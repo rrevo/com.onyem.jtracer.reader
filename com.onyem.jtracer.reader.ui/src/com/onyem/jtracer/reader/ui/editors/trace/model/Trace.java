@@ -33,6 +33,7 @@ import com.onyem.jtracer.reader.parser.PropertyKeys;
 import com.onyem.jtracer.reader.parser.factory.EventParserFactory;
 import com.onyem.jtracer.reader.parser.factory.MetaParserFactory;
 import com.onyem.jtracer.reader.parser.factory.PropertiesParserFactory;
+import com.onyem.jtracer.reader.queue.IQueueService;
 import com.onyem.jtracer.reader.ui.editors.trace.model.rules.ClassNameRule;
 import com.onyem.jtracer.reader.ui.editors.trace.model.rules.ClassTraceCheckerFactory;
 import com.onyem.jtracer.reader.ui.editors.trace.model.rules.IRuleClassTraceChecker;
@@ -56,7 +57,8 @@ public class Trace implements Closeable {
       MetaParserFactory metaParserFactory,
       IMetaServiceFactory metaServiceFactory,
       EventParserFactory eventParserFactory,
-      IEventServiceFactory eventServiceFactory, String applicationPath) {
+      IEventServiceFactory eventServiceFactory, IQueueService queueService,
+      String applicationPath) {
     this.applicationPath = applicationPath;
 
     File jtraceFile = new File(applicationPath, Constants.TRACE_FILE_NAME);
@@ -84,6 +86,8 @@ public class Trace implements Closeable {
 
     // Get some events from the 0th eventService
     validate(eventServiceMap.get(eventServiceMap.keySet().iterator().next()));
+
+    loadEvents(eventServiceMap, queueService);
   }
 
   private String getDatabasePath() {
@@ -162,6 +166,13 @@ public class Trace implements Closeable {
    */
   private void validate(IEventService eventService) {
     eventService.getNextEvent(null);
+  }
+
+  private void loadEvents(Map<String, IEventService> eventServiceMap,
+      IQueueService queueService) {
+    for (IEventService eventService : eventServiceMap.values()) {
+      eventService.loadEvents(queueService);
+    }
   }
 
   public String getApplicationPath() {

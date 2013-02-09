@@ -39,7 +39,7 @@ public class TraceFactoryImpl implements TraceFactory {
 
   public void create(final String applicationPath,
       final TraceResultClient traceResultClient) {
-    IQueueService queueService = Activator.getQueue();
+    final IQueueService queueService = Activator.getQueue();
     queueService.queueNow(new Runnable() {
 
       @Override
@@ -47,7 +47,8 @@ public class TraceFactoryImpl implements TraceFactory {
         try {
           Trace trace = new Trace(propertiesParserFactory,
               connectionManagerFactory, metaParserFactory, metaServiceFactory,
-              eventParserFactory, eventServiceFactory, applicationPath);
+              eventParserFactory, eventServiceFactory, queueService,
+              applicationPath);
           traceResultClient.setTraceResult(trace, null);
         } catch (Exception e) {
           traceResultClient.setTraceResult(null, e);
