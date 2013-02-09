@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Javax Inject
+Bundle-SymbolicName: onyem.javax.inject
+Bundle-Version: 1.0.0
+Bundle-ClassPath: javax.inject.jar
+Bundle-Vendor: Onyem
+Export-Package: javax.inject;version="1.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

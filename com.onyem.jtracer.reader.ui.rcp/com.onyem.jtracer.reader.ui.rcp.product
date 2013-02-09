@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+
+<product name="com.onyem.jtracer.reader.ui.rcp.product" uid="com.onyem.jtracer.reader.ui.rcp.product" id="com.onyem.jtracer.reader.ui.product" application="com.onyem.jtracer.reader.ui.application" version="5.0.0.haskell" useFeatures="false" includeLaunchers="true">
+
+   <configIni use="default">
+   </configIni>
+
+   <launcherArgs>
+      <programArgs>-data @user.home/.onyem/jtracer/reader</programArgs>
+      <vmArgs>-Dosgi.requiredJavaVersion=1.6 -XX:MaxPermSize=256m -Xms40m -Xmx384m</vmArgs>
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
+   </launcherArgs>
+   
+   <windowImages/>
+   
+   <splash
+      location="com.onyem.jtracer.reader.ui"
+      startupProgressRect="5,275,490,15"
+      startupMessageRect="7,252,445,20"
+      startupForegroundColor="000000" />
+      
+   <launcher name="reader">
+      <solaris/>
+      <win useIco="false">
+         <bmp/>
+      </win>
+   </launcher>
+
+   <vm>
+   </vm>
+
+   <plugins>
+      <plugin id="com.ibm.icu"/>
+      <plugin id="com.onyem.jtracer.reader.common"/>
+      <plugin id="com.onyem.jtracer.reader.db"/>
+      <plugin id="com.onyem.jtracer.reader.events"/>
+      <plugin id="com.onyem.jtracer.reader.meta"/>
+      <plugin id="com.onyem.jtracer.reader.parser"/>
+      <plugin id="com.onyem.jtracer.reader.queue"/>
+      <plugin id="com.onyem.jtracer.reader.ui"/>
+      <plugin id="com.onyem.jtracer.reader.utils"/>
+      <plugin id="onyem.com.google.inject"/>
+      <plugin id="onyem.javax.annotation"/>
+      <plugin id="onyem.javax.inject"/>
+      <plugin id="onyem.org.aopalliance"/>
+      <plugin id="onyem.org.apache.commons.dbcp"/>
+      <plugin id="onyem.org.h2"/>
+      <plugin id="org.eclipse.core.commands"/>
+      <plugin id="org.eclipse.core.contenttype"/>
+      <plugin id="org.eclipse.core.databinding"/>
+      <plugin id="org.eclipse.core.databinding.observable"/>
+      <plugin id="org.eclipse.core.databinding.property"/>
+      <plugin id="org.eclipse.core.expressions"/>
+      <plugin id="org.eclipse.core.jobs"/>
+      <plugin id="org.eclipse.core.runtime"/>
+      <plugin id="org.eclipse.core.runtime.compatibility.registry" fragment="true"/>
+      <plugin id="org.eclipse.draw2d"/>
+      <plugin id="org.eclipse.equinox.app"/>
+      <plugin id="org.eclipse.equinox.common"/>
+      <plugin id="org.eclipse.equinox.preferences"/>
+      <plugin id="org.eclipse.equinox.registry"/>
+      <plugin id="org.eclipse.help"/>
+      <plugin id="org.eclipse.jface"/>
+      <plugin id="org.eclipse.jface.databinding"/>
+      <plugin id="org.eclipse.osgi"/>
+      <plugin id="org.eclipse.swt"/>
+      <plugin id="org.eclipse.swt.gtk.linux.x86" fragment="true" os="linux" ws="gtk" arch="x86"/>
+      <plugin id="org.eclipse.swt.gtk.linux.x86_64" fragment="true" os="linux" ws="gtk" arch="x86_64"/>
+      <plugin id="org.eclipse.swt.win32.win32.x86" fragment="true" os="win32" ws="win32" arch="x86"/>
+      <plugin id="org.eclipse.swt.win32.win32.x86_64" fragment="true" os="win32" ws="win32" arch="x86_64"/>
+      <plugin id="org.eclipse.ui"/>
+      <plugin id="org.eclipse.ui.forms"/>
+      <plugin id="org.eclipse.ui.workbench"/>
+   </plugins>
+
+   <configurations>
+      <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
+      <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="0" />
+      <property name="osgi.clean" value="true" />
+   </configurations>
+
+</product>

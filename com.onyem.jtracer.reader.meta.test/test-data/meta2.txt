@@ -1,0 +1,4 @@
+<ic|0|50|33|org/world/Signature|<P:Ljava/lang/Object;>Ljava/lang/Object;|java/lang/Object||>
+<im|1|0|1|<init>|()V|||>
+<im|2|0|1|aMethod|(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;|<Q:Ljava/lang/Object;>(TP;TQ;)TQ;||>
+<im|3|0|9|main|([Ljava/lang/String;)V|||>

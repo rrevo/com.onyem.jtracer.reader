@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Parser API
+Bundle-SymbolicName: com.onyem.jtracer.reader.parser
+Bundle-Version: 5.0.0.haskell
+Bundle-Vendor: Onyem
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: onyem.com.google.inject,
+ onyem.javax.annotation,
+ com.onyem.jtracer.reader.utils,
+ com.onyem.jtracer.reader.common
+Export-Package: com.onyem.jtracer.reader.parser,
+ com.onyem.jtracer.reader.parser.factory

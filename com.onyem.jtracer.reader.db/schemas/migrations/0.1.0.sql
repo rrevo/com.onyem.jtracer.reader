@@ -1,0 +1,8 @@
+
+-- Metadata table
+CREATE TABLE ONYEM (
+  VERSION VARCHAR(10)
+);
+
+-- Single row in ONYEM
+INSERT INTO ONYEM VALUES('0.1.0');

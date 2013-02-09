@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.7"?>
+<plugin>
+   <extension
+         id="application"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            cardinality="singleton-global"
+            thread="main"
+            visible="true">
+         <run
+               class="com.onyem.jtracer.reader.ui.Application">
+         </run>
+      </application>
+   </extension>
+
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="com.onyem.jtracer.reader.ui.application"
+            name="com.onyem.jtracer.reader.ui.rcp.product">
+         <property
+               name="appName"
+               value="com.onyem.jtracer.reader.ui.rcp.product">
+         </property>
+      </product>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="com.onyem.jtracer.reader.ui.Perspective"
+            id="com.onyem.jtracer.reader.ui.Perspective"
+            name="Reader Perspective">
+      </perspective>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="com.onyem.jtracer.reader.ui.actions.OnlineHelpAction"
+            name="Online Help">
+      </command>
+      <command
+            id="com.onyem.jtracer.reader.ui.actions.AboutAction"
+            name="About">
+      </command>
+      <command
+            id="com.onyem.jtracer.reader.ui.actions.OpenFileAction"
+            name="Open File">
+      </command>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="com.onyem.jtracer.reader.ui.editors.TraceEditor"
+            default="false"
+            extensions="jtrace"
+            id="com.onyem.jtracer.reader.ui.editors.TraceEditor"
+            name="JTrace Reader">
+      </editor>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.onyem.jtracer.reader.ui.actions.OpenFileAction"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+O">
+      </key>
+      <key
+            commandId="org.eclipse.ui.file.exit"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+Q">
+      </key>
+   </extension>
+
+</plugin>

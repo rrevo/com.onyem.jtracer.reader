@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Meta API
+Bundle-SymbolicName: com.onyem.jtracer.reader.meta
+Bundle-Version: 5.0.0.haskell
+Bundle-Vendor: Onyem
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: onyem.javax.annotation,
+ onyem.com.google.inject,
+ com.onyem.jtracer.reader.common,
+ com.onyem.jtracer.reader.parser,
+ com.onyem.jtracer.reader.db
+Export-Package: com.onyem.jtracer.reader.meta,
+ com.onyem.jtracer.reader.meta.factory

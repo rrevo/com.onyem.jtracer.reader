@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Test
+Bundle-SymbolicName: com.onyem.jtracer.reader.meta.test
+Bundle-Version: 5.0.0.haskell
+Bundle-Vendor: Onyem
+Fragment-Host: com.onyem.jtracer.reader.meta;bundle-version="5.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.junit,
+ com.onyem.jtracer.reader.utils

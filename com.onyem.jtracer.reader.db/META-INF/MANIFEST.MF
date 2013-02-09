@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Database API
+Bundle-SymbolicName: com.onyem.jtracer.reader.db
+Bundle-Version: 5.0.0.haskell
+Bundle-Vendor: Onyem
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.eclipse.core.runtime,
+ onyem.org.h2,
+ onyem.javax.annotation,
+ onyem.org.apache.commons.dbcp,
+ onyem.com.google.inject,
+ onyem.org.aopalliance,
+ com.onyem.jtracer.reader.common
+Export-Package: com.onyem.jtracer.reader.db,
+ com.onyem.jtracer.reader.db.factory,
+ com.onyem.jtracer.reader.db.util

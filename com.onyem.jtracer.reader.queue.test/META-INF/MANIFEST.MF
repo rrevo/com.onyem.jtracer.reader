@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Database API Test
+Bundle-SymbolicName: com.onyem.jtracer.reader.queue.test
+Bundle-Version: 5.0.0.haskell
+Bundle-Vendor: Onyem
+Fragment-Host: com.onyem.jtracer.reader.queue
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.junit

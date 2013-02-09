@@ -1,0 +1,23 @@
+#Whitespace in this file is important
+
+# Simple key value pair
+version=4.0.0.groovy
+startTime=12345
+
+out-prefix=out_runMultithreaded
+selector=+org.**
+trigger=a{z},b{y},c{x}
+
+#Multiple values. a is repeated
+event-file=a
+event-file =a
+
+#Keys and values are trimmed
+ event-file = b 
+event-file=c 
+
+#Inline comments
+
+#No value checks
+ random 
+randomWithEmptyValue=  

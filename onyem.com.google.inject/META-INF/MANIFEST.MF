@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Google Guice
+Bundle-SymbolicName: onyem.com.google.inject
+Bundle-Version: 3.0.0
+Bundle-ClassPath: guice-3.0.jar,
+ guice-assistedinject-3.0.jar
+Bundle-Vendor: Onyem
+Export-Package: com.google.inject,
+ com.google.inject.assistedinject,
+ com.google.inject.binder,
+ com.google.inject.internal,
+ com.google.inject.internal.asm,
+ com.google.inject.internal.cglib.core,
+ com.google.inject.internal.cglib.proxy,
+ com.google.inject.internal.cglib.reflect,
+ com.google.inject.internal.util,
+ com.google.inject.matcher,
+ com.google.inject.name,
+ com.google.inject.spi,
+ com.google.inject.util
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: onyem.javax.inject,
+ onyem.org.aopalliance

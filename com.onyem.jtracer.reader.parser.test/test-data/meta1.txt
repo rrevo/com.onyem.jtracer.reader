@@ -1,0 +1,11 @@
+<ic|0|50|33|org/world/HelloWorld||java/lang/Object|org/world/Marker,org/world/Talker,|>
+<im|1|0|1|<init>|()V|||>
+<im|2|0|9|main|([Ljava/lang/String;)V|||>
+<im|3|0|2|run|()V|||>
+<im|4|0|1|say|(Ljava/lang/String;)V|||>
+<ic|5|50|1536|org/world/Marker||java/lang/Object||>
+<ic|6|50|1536|org/world/Talker||java/lang/Object||>
+<im|7|6|1025|say|(Ljava/lang/String;)V|||>
+<ic|8|50|32|org/world/HelloWorld$1||java/lang/Object|java/lang/Runnable,|>
+<im|9|8|0|<init>|(Lorg/world/HelloWorld;)V|||>
+<im|10|8|1|run|()V|||>
