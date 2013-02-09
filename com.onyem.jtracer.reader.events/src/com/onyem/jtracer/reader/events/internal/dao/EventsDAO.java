@@ -128,4 +128,18 @@ public class EventsDAO {
     });
     return getEventById(id);
   }
+
+  @Transactional
+  public IInvocationEvent getLastLoadedEvent(EventFile eventFile) {
+    ParameterSource parameterSource = new LongParameterSource(eventFile.getId());
+    MethodEventRowMapper rowMapper = new MethodEventRowMapper(metaService,
+        eventService);
+    IInvocationEvent event = helper.queryForObject(
+        "SELECT E.ID, E.POSITION, E.EVENT_TYPE, E.THREAD_ID, EM.METHOD_ID "
+            + "FROM EVENTS E JOIN EVENT_METHODS EM "
+            + "WHERE E.ID = EM.EVENT_ID AND E.ID = "
+            + " (SELECT MAX(E2.ID) FROM EVENTS E2 WHERE EVENT_FILE_ID = ? )",
+        parameterSource, rowMapper);
+    return event;
+  }
 }

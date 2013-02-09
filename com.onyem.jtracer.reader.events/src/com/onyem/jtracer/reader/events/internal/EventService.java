@@ -15,6 +15,7 @@ import com.onyem.jtracer.reader.events.model.IInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IInvocationThread;
 import com.onyem.jtracer.reader.parser.IEventParser;
 import com.onyem.jtracer.reader.parser.ILine;
+import com.onyem.jtracer.reader.queue.IQueueService;
 
 @Service
 @ThreadSafe
@@ -150,4 +151,33 @@ public class EventService implements IEventServiceExtended {
     return threadDAO.getOrInsertThreadById(id);
   }
 
+  @Override
+  public void loadEvents(final IQueueService queueService) {
+    queueService.queueLater(new Runnable() {
+
+      @Override
+      public void run() {
+        EventFile eventFile = eventFileDAO.getOrInsertEventFileByName(name);
+        IInvocationEvent lastLoadedEvent = eventsDAO
+            .getLastLoadedEvent(eventFile);
+        loadEvents(queueService, lastLoadedEvent);
+      }
+    });
+  }
+
+  private void loadEvents(final IQueueService queueService,
+      final IInvocationEvent lastEvent) {
+    queueService.queueLater(new Runnable() {
+
+      @Override
+      public void run() {
+        List<IInvocationEvent> nextEvents = EventService.this
+            .getNextEvent(lastEvent);
+        if (!nextEvents.isEmpty()) {
+          IInvocationEvent newLastEvent = nextEvents.get(nextEvents.size() - 1);
+          loadEvents(queueService, newLastEvent);
+        }
+      }
+    });
+  }
 }

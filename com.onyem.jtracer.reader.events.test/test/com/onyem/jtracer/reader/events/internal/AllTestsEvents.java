@@ -6,7 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({ EventsWithSmallFileTest.class, EventsWithMediumFileTest.class,
-    EventsWithMediumFile2Test.class })
+    EventsWithMediumFile2Test.class, LoadEventsTest.class })
 public class AllTestsEvents {
 
 }

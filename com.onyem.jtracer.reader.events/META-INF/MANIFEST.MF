@@ -11,7 +11,8 @@ Require-Bundle: org.eclipse.core.runtime,
  com.onyem.jtracer.reader.db,
  com.onyem.jtracer.reader.common,
  com.onyem.jtracer.reader.parser,
- com.onyem.jtracer.reader.meta
+ com.onyem.jtracer.reader.meta,
+ com.onyem.jtracer.reader.queue
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: com.onyem.jtracer.reader.events,

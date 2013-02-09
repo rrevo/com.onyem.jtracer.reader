@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import junit.framework.Assert;
+
 import org.junit.After;
 import org.junit.Before;
 
@@ -14,6 +16,9 @@ import com.onyem.jtracer.reader.db.factory.DbModule;
 import com.onyem.jtracer.reader.db.factory.IConnectionManagerFactory;
 import com.onyem.jtracer.reader.events.factory.EventModule;
 import com.onyem.jtracer.reader.events.factory.IEventServiceFactory;
+import com.onyem.jtracer.reader.events.model.IInvocationEvent;
+import com.onyem.jtracer.reader.events.model.IMethodInvocationEvent;
+import com.onyem.jtracer.reader.events.model.InvocationEventType;
 import com.onyem.jtracer.reader.meta.IMetaService;
 import com.onyem.jtracer.reader.meta.factory.IMetaServiceFactory;
 import com.onyem.jtracer.reader.meta.factory.MetaModule;
@@ -81,4 +86,12 @@ public abstract class AbstractEventTest {
     return IEventServiceExtended.DEFAULT_EVENTS_COUNT;
   }
 
+  protected void assertEvent(InvocationEventType type, long threadId,
+      long methodId, IInvocationEvent event) {
+    IMethodInvocationEvent methodEvent = (IMethodInvocationEvent) event;
+    Assert.assertEquals(type, methodEvent.getType());
+    Assert.assertEquals(threadId, methodEvent.getThread().getId());
+    Assert.assertEquals(methodId, methodEvent.getMethod().getMetaId()
+        .longValue());
+  }
 }

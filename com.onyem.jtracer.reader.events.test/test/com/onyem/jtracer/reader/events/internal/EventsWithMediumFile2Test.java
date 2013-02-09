@@ -7,7 +7,6 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import com.onyem.jtracer.reader.events.model.IInvocationEvent;
-import com.onyem.jtracer.reader.events.model.IMethodInvocationEvent;
 import com.onyem.jtracer.reader.events.model.InvocationEventType;
 
 public class EventsWithMediumFile2Test extends AbstractEventTest {
@@ -240,12 +239,4 @@ public class EventsWithMediumFile2Test extends AbstractEventTest {
     assertEvent(InvocationEventType.MethodExit, 11, 10, events.get(index++));
   }
 
-  private void assertEvent(InvocationEventType type, long threadId,
-      long methodId, IInvocationEvent event) {
-    IMethodInvocationEvent methodEvent = (IMethodInvocationEvent) event;
-    Assert.assertEquals(type, methodEvent.getType());
-    Assert.assertEquals(threadId, methodEvent.getThread().getId());
-    Assert.assertEquals(methodId, methodEvent.getMethod().getMetaId()
-        .longValue());
-  }
 }
