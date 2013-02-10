@@ -10,7 +10,6 @@ import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.GridLayout;
 import org.eclipse.draw2d.IFigure;
-import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.LayeredPane;
 import org.eclipse.draw2d.LayoutListener;
 import org.eclipse.draw2d.ScrollPane;
@@ -18,17 +17,17 @@ import org.eclipse.draw2d.XYLayout;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import com.onyem.jtracer.reader.events.IEventService;
 import com.onyem.jtracer.reader.events.model.IInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IInvocationThread;
 import com.onyem.jtracer.reader.queue.IQueueService;
-import com.onyem.jtracer.reader.ui.Activator;
-import com.onyem.jtracer.reader.ui.IImageManager;
 import com.onyem.jtracer.reader.ui.editors.trace.model.Trace;
 import com.onyem.jtracer.reader.ui.editors.trace.model.figure.EventTraceFigureModel;
+import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.events.EventFigureFactory;
+import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.events.InvocationEventFigure;
+import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.layout.LayoutCache;
 import com.onyem.jtracer.reader.ui.util.SWTUtils;
 
 public class EventTraceFigure extends Figure implements Observer {
@@ -38,6 +37,9 @@ public class EventTraceFigure extends Figure implements Observer {
   private final IEventService eventService;
   private final IQueueService queueService;
 
+  private final EventFigureFactory eventFigureFactory;
+  private final LayoutCache layoutCache;
+
   // Child figures
   private final IFigure threadsHeaderFigure;
   private final Map<IInvocationThread, InvocationThreadHeaderFigure> threadHeaderFigureMap;
@@ -45,6 +47,9 @@ public class EventTraceFigure extends Figure implements Observer {
   private final IFigure threadsLayer;
   private final GridLayout threadsLayerLayout;
   private final Map<IInvocationThread, InvocationThreadFigure> threadFigureMap;
+
+  // Last InvocationEventFigure in event
+  private InvocationEventFigure lastEventFigure = null;
 
   public EventTraceFigure(Trace trace, String eventFileName,
       IQueueService queueService) {
@@ -54,6 +59,9 @@ public class EventTraceFigure extends Figure implements Observer {
 
     eventService = trace.getEventService(eventFileName);
     this.queueService = queueService;
+
+    eventFigureFactory = new EventFigureFactory();
+    layoutCache = new LayoutCache();
 
     GridLayout gridLayout = new GridLayout();
     gridLayout.numColumns = 1;
@@ -172,7 +180,7 @@ public class EventTraceFigure extends Figure implements Observer {
     SWTUtils.assertDisplayThread();
 
     for (IInvocationEvent invocationEvent : newEvents) {
-      addEvent(new EventFigure(invocationEvent));
+      addEvent(invocationEvent);
     }
 
     // Continue loading
@@ -181,10 +189,16 @@ public class EventTraceFigure extends Figure implements Observer {
     }
   }
 
-  private void addEvent(EventFigure eventFigure) {
-    InvocationThreadFigure threadFigure = getThreadFigure(eventFigure
-        .getEvent().getThread());
+  private void addEvent(IInvocationEvent invocationEvent) {
+    InvocationThreadFigure threadFigure = getThreadFigure(invocationEvent
+        .getThread());
+
+    InvocationEventFigure lastThreadEventFigure = threadFigure
+        .getLastEventThreadFigure();
+    InvocationEventFigure eventFigure = eventFigureFactory.create(
+        invocationEvent, lastEventFigure, lastThreadEventFigure);
     threadFigure.addThreadEvent(eventFigure);
+    lastEventFigure = eventFigure;
   }
 
   private InvocationThreadFigure getThreadFigure(IInvocationThread thread) {
@@ -197,7 +211,8 @@ public class EventTraceFigure extends Figure implements Observer {
       threadsHeaderFigure.setConstraint(headerFigure, new Rectangle(
           new Rectangle(new Point(0, 0), headerFigure.getPreferredSize())));
 
-      InvocationThreadFigure threadFigure = new InvocationThreadFigure(thread);
+      InvocationThreadFigure threadFigure = new InvocationThreadFigure(
+          layoutCache, thread);
       threadsLayerLayout.numColumns = threadsLayerLayout.numColumns + 1;
       threadFigureMap.put(thread, threadFigure);
 
@@ -209,53 +224,5 @@ public class EventTraceFigure extends Figure implements Observer {
     }
 
     return threadFigureMap.get(thread);
-  }
-
-  private static class EventFigure extends Figure {
-
-    private final IInvocationEvent invocationEvent;
-
-    public EventFigure(IInvocationEvent invocationEvent) {
-      this.invocationEvent = invocationEvent;
-
-      GridLayout gridLayout = makeGridLayout();
-      gridLayout.numColumns = 2;
-      setLayoutManager(gridLayout);
-
-      Image leftImage = getImage();
-      IFigure imageFigure = new Label(leftImage);
-      add(imageFigure);
-
-      GridData gridData = new GridData(GridData.VERTICAL_ALIGN_BEGINNING);
-      gridLayout.setConstraint(imageFigure, gridData);
-
-      IFigure normalFigure = makeNormalFigure();
-      add(normalFigure);
-    }
-
-    IInvocationEvent getEvent() {
-      return invocationEvent;
-    }
-
-    private GridLayout makeGridLayout() {
-      GridLayout gridLayout = new GridLayout();
-      gridLayout.marginHeight = 0;
-      gridLayout.marginWidth = 0;
-      gridLayout.verticalSpacing = 0;
-      gridLayout.horizontalSpacing = 0;
-      return gridLayout;
-    }
-
-    private IFigure makeNormalFigure() {
-      IFigure figure = new Label(invocationEvent.getThread().getId() + ">"
-          + invocationEvent.getId());
-      figure.setOpaque(true);
-      return figure;
-    }
-
-    private Image getImage() {
-      return Activator.getImageManager().getImage(IImageManager.METHOD_ENTRY);
-    }
-
   }
 }
