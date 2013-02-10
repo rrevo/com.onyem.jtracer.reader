@@ -5,14 +5,14 @@ public interface Constants {
   public final String TRACE_FILE_NAME = "jtrace";
   public final String META_FILE_NAME = "meta.out";
   public final String EVENT_FILE_NAME = "event.out";
-  //
+
   //  public final String AGENT_FOLDER = "agent";
   //  public final String SAMPLES_FOLDER = "samples";
   //  public final String SAMPLES_LOGS_FOLDER = "logs";
-  //
-  //  public final int METHOD_STEP = 10;
-  //  public final int INDENT_STEP = 10;
-  //
+
+  public final int METHOD_STEP = 10;
+  public final int INDENT_STEP = 10;
+
   //  public final int MOUSE_ACCELERATION = 10;
   //
   //  public final boolean DEBUG = false;

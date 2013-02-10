@@ -1,6 +1,8 @@
 package com.onyem.jtracer.reader.ui.editors.trace.ui.figure;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -9,13 +11,15 @@ import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.GridLayout;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
+import org.eclipse.draw2d.LayeredPane;
 import org.eclipse.draw2d.ScrollPane;
-import org.eclipse.draw2d.ToolbarLayout;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import com.onyem.jtracer.reader.events.IEventService;
 import com.onyem.jtracer.reader.events.model.IInvocationEvent;
+import com.onyem.jtracer.reader.events.model.IInvocationThread;
 import com.onyem.jtracer.reader.queue.IQueueService;
 import com.onyem.jtracer.reader.ui.Activator;
 import com.onyem.jtracer.reader.ui.IImageManager;
@@ -30,7 +34,10 @@ public class EventTraceFigure extends Figure implements Observer {
   private final IEventService eventService;
   private final IQueueService queueService;
 
-  private final Figure body;
+  // 
+  private final IFigure threadsLayer;
+  private final GridLayout threadsLayerLayout;
+  private final Map<IInvocationThread, InvocationThreadFigure> threadFigures;
 
   public EventTraceFigure(Trace trace, String eventFileName,
       IQueueService queueService) {
@@ -46,19 +53,25 @@ public class EventTraceFigure extends Figure implements Observer {
     setLayoutManager(gridLayout);
 
     ScrollPane scrollPane = new ScrollPane();
-    body = new Figure();
-
-    scrollPane.setContents(body);
-    add(scrollPane);
-
     GridData gridData = new GridData();
     gridData.grabExcessHorizontalSpace = true;
     gridData.grabExcessVerticalSpace = true;
+    gridData.horizontalAlignment = SWT.BEGINNING;
+    gridData.verticalAlignment = SWT.BEGINNING;
     gridLayout.setConstraint(scrollPane, gridData);
+    add(scrollPane);
 
-    ToolbarLayout layout = new ToolbarLayout();
-    layout.setSpacing(20);
-    body.setLayoutManager(layout);
+    LayeredPane mainLayer = new LayeredPane();
+    scrollPane.setContents(mainLayer);
+
+    threadsLayer = new LayeredPane();
+    mainLayer.add(threadsLayer, "events");
+
+    threadsLayerLayout = new GridLayout();
+    threadsLayerLayout.numColumns = 0;
+    threadsLayer.setLayoutManager(threadsLayerLayout);
+
+    threadFigures = new HashMap<IInvocationThread, InvocationThreadFigure>();
 
     // Start loading events
     loadEvents(null);
@@ -92,13 +105,35 @@ public class EventTraceFigure extends Figure implements Observer {
     SWTUtils.assertDisplayThread();
 
     for (IInvocationEvent invocationEvent : newEvents) {
-      body.add(new EventFigure(invocationEvent));
+      addEvent(new EventFigure(invocationEvent));
     }
 
     // Continue loading
     if (!newEvents.isEmpty()) {
       loadEvents(newEvents.get(newEvents.size() - 1));
     }
+  }
+
+  private void addEvent(EventFigure eventFigure) {
+    InvocationThreadFigure threadFigure = getThreadFigure(eventFigure
+        .getEvent().getThread());
+    threadFigure.addThreadEvent(eventFigure);
+  }
+
+  private InvocationThreadFigure getThreadFigure(IInvocationThread thread) {
+    if (!threadFigures.containsKey(thread)) {
+      InvocationThreadFigure threadFigure = new InvocationThreadFigure(thread);
+      threadsLayerLayout.numColumns = threadsLayerLayout.numColumns + 1;
+      threadFigures.put(thread, threadFigure);
+
+      threadsLayer.add(threadFigure);
+      GridData gridData = new GridData();
+      gridData.horizontalAlignment = SWT.BEGINNING;
+      gridData.verticalAlignment = SWT.BEGINNING;
+      threadsLayerLayout.setConstraint(threadFigure, gridData);
+    }
+
+    return threadFigures.get(thread);
   }
 
   private static class EventFigure extends Figure {
@@ -123,6 +158,10 @@ public class EventTraceFigure extends Figure implements Observer {
       add(normalFigure);
     }
 
+    IInvocationEvent getEvent() {
+      return invocationEvent;
+    }
+
     private GridLayout makeGridLayout() {
       GridLayout gridLayout = new GridLayout();
       gridLayout.marginHeight = 0;
@@ -133,7 +172,8 @@ public class EventTraceFigure extends Figure implements Observer {
     }
 
     private IFigure makeNormalFigure() {
-      IFigure figure = new Label(invocationEvent.toString());
+      IFigure figure = new Label(invocationEvent.getThread().getId() + ">"
+          + invocationEvent.getId());
       figure.setOpaque(true);
       return figure;
     }
