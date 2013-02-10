@@ -62,6 +62,16 @@ abstract class MethodInvocationFigure extends InvocationEventFigure {
   protected abstract Image getImage();
 
   @Override
+  public IFigure getTopConnectionFigure() {
+    return imageFigure;
+  }
+
+  @Override
+  public IFigure getBottomConnectionFigure() {
+    return imageFigure;
+  }
+
+  @Override
   public String toString() {
     return "MethodInvocationFigure [methodInvocation=" + methodInvocation + "]";
   }

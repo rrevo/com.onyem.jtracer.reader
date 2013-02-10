@@ -6,12 +6,15 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.eclipse.draw2d.ConnectionLayer;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.GridLayout;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.LayeredPane;
 import org.eclipse.draw2d.LayoutListener;
+import org.eclipse.draw2d.ManhattanConnectionRouter;
+import org.eclipse.draw2d.PolylineConnection;
 import org.eclipse.draw2d.ScrollPane;
 import org.eclipse.draw2d.XYLayout;
 import org.eclipse.draw2d.geometry.Point;
@@ -25,6 +28,8 @@ import com.onyem.jtracer.reader.events.model.IInvocationThread;
 import com.onyem.jtracer.reader.queue.IQueueService;
 import com.onyem.jtracer.reader.ui.editors.trace.model.Trace;
 import com.onyem.jtracer.reader.ui.editors.trace.model.figure.EventTraceFigureModel;
+import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.connector.BottomLeftBoundsAnchor;
+import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.connector.TopLeftBoundsAnchor;
 import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.events.EventFigureFactory;
 import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.events.InvocationEventFigure;
 import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.layout.LayoutCache;
@@ -47,6 +52,8 @@ public class EventTraceFigure extends Figure implements Observer {
   private final IFigure threadsLayer;
   private final GridLayout threadsLayerLayout;
   private final Map<IInvocationThread, InvocationThreadFigure> threadFigureMap;
+
+  private final ConnectionLayer connectionsLayer;
 
   // Last InvocationEventFigure in event
   private InvocationEventFigure lastEventFigure = null;
@@ -100,6 +107,10 @@ public class EventTraceFigure extends Figure implements Observer {
 
       LayeredPane mainLayer = new LayeredPane();
       scrollPane.setContents(mainLayer);
+
+      connectionsLayer = new ConnectionLayer();
+      connectionsLayer.setConnectionRouter(new ManhattanConnectionRouter());
+      mainLayer.add(connectionsLayer, "connections");
 
       threadsLayer = new LayeredPane();
       mainLayer.add(threadsLayer, "events");
@@ -198,7 +209,16 @@ public class EventTraceFigure extends Figure implements Observer {
     InvocationEventFigure eventFigure = eventFigureFactory.create(
         invocationEvent, lastEventFigure, lastThreadEventFigure);
     threadFigure.addThreadEvent(eventFigure);
+
     lastEventFigure = eventFigure;
+
+    if (lastThreadEventFigure != null) {
+      PolylineConnection connection = new PolylineConnection();
+      connection.setSourceAnchor(new BottomLeftBoundsAnchor(
+          lastThreadEventFigure));
+      connection.setTargetAnchor(new TopLeftBoundsAnchor(eventFigure));
+      connectionsLayer.add(connection);
+    }
   }
 
   private InvocationThreadFigure getThreadFigure(IInvocationThread thread) {

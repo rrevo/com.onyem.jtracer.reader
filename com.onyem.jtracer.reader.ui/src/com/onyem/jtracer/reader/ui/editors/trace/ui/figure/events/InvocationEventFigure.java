@@ -1,6 +1,7 @@
 package com.onyem.jtracer.reader.ui.editors.trace.ui.figure.events;
 
 import org.eclipse.draw2d.Figure;
+import org.eclipse.draw2d.IFigure;
 
 import com.onyem.jtracer.reader.events.model.IInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IInvocationThread;
@@ -65,6 +66,10 @@ public abstract class InvocationEventFigure extends Figure {
     //    return nextThreadFigure;
     throw new UnsupportedOperationException();
   }
+
+  public abstract IFigure getTopConnectionFigure();
+
+  public abstract IFigure getBottomConnectionFigure();
 
   public abstract int getPreIndent();
 
