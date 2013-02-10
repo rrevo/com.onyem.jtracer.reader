@@ -12,7 +12,11 @@ import org.eclipse.draw2d.GridLayout;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Label;
 import org.eclipse.draw2d.LayeredPane;
+import org.eclipse.draw2d.LayoutListener;
 import org.eclipse.draw2d.ScrollPane;
+import org.eclipse.draw2d.XYLayout;
+import org.eclipse.draw2d.geometry.Point;
+import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
@@ -34,10 +38,13 @@ public class EventTraceFigure extends Figure implements Observer {
   private final IEventService eventService;
   private final IQueueService queueService;
 
-  // 
+  // Child figures
+  private final IFigure threadsHeaderFigure;
+  private final Map<IInvocationThread, InvocationThreadHeaderFigure> threadHeaderFigureMap;
+
   private final IFigure threadsLayer;
   private final GridLayout threadsLayerLayout;
-  private final Map<IInvocationThread, InvocationThreadFigure> threadFigures;
+  private final Map<IInvocationThread, InvocationThreadFigure> threadFigureMap;
 
   public EventTraceFigure(Trace trace, String eventFileName,
       IQueueService queueService) {
@@ -52,27 +59,87 @@ public class EventTraceFigure extends Figure implements Observer {
     gridLayout.numColumns = 1;
     setLayoutManager(gridLayout);
 
-    ScrollPane scrollPane = new ScrollPane();
-    GridData gridData = new GridData();
-    gridData.grabExcessHorizontalSpace = true;
-    gridData.grabExcessVerticalSpace = true;
-    gridData.horizontalAlignment = SWT.BEGINNING;
-    gridData.verticalAlignment = SWT.BEGINNING;
-    gridLayout.setConstraint(scrollPane, gridData);
-    add(scrollPane);
+    // Header
+    {
+      ScrollPane scrollPane = new ScrollPane();
+      scrollPane.setVerticalScrollBarVisibility(ScrollPane.NEVER);
+      scrollPane.setHorizontalScrollBarVisibility(ScrollPane.NEVER);
 
-    LayeredPane mainLayer = new LayeredPane();
-    scrollPane.setContents(mainLayer);
+      GridData gridData = new GridData();
+      gridData.grabExcessHorizontalSpace = true;
+      gridLayout.setConstraint(scrollPane, gridData);
+      add(scrollPane);
 
-    threadsLayer = new LayeredPane();
-    mainLayer.add(threadsLayer, "events");
+      threadsHeaderFigure = new Figure();
+      scrollPane.setContents(threadsHeaderFigure);
 
-    threadsLayerLayout = new GridLayout();
-    threadsLayerLayout.numColumns = 0;
-    threadsLayer.setLayoutManager(threadsLayerLayout);
+      XYLayout layout = new XYLayout();
+      threadsHeaderFigure.setLayoutManager(layout);
 
-    threadFigures = new HashMap<IInvocationThread, InvocationThreadFigure>();
+      threadHeaderFigureMap = new HashMap<IInvocationThread, InvocationThreadHeaderFigure>();
+    }
 
+    // Body
+    {
+      ScrollPane scrollPane = new ScrollPane();
+      GridData gridData = new GridData();
+      gridData.grabExcessHorizontalSpace = true;
+      gridData.grabExcessVerticalSpace = true;
+      gridData.horizontalAlignment = SWT.BEGINNING;
+      gridData.verticalAlignment = SWT.BEGINNING;
+      gridLayout.setConstraint(scrollPane, gridData);
+      add(scrollPane);
+
+      LayeredPane mainLayer = new LayeredPane();
+      scrollPane.setContents(mainLayer);
+
+      threadsLayer = new LayeredPane();
+      mainLayer.add(threadsLayer, "events");
+
+      threadsLayerLayout = new GridLayout();
+      threadsLayerLayout.numColumns = 0;
+      threadsLayer.setLayoutManager(threadsLayerLayout);
+
+      threadFigureMap = new HashMap<IInvocationThread, InvocationThreadFigure>();
+
+      // Transpose the x coordinate of the threadFigure to the threadHeaderFigure
+      scrollPane.addLayoutListener(new LayoutListener() {
+
+        @Override
+        public void setConstraint(IFigure child, Object constraint) {
+        }
+
+        @Override
+        public void remove(IFigure child) {
+        }
+
+        @Override
+        public void postLayout(IFigure container) {
+          for (IInvocationThread thread : threadFigureMap.keySet()) {
+            InvocationThreadFigure threadFigure = threadFigureMap.get(thread);
+            InvocationThreadHeaderFigure threadHeaderFigure = threadHeaderFigureMap
+                .get(thread);
+            XYLayout layoutManager = (XYLayout) threadsHeaderFigure
+                .getLayoutManager();
+            Rectangle constraint = (Rectangle) layoutManager
+                .getConstraint(threadHeaderFigure);
+            int newX = threadFigure.getLocation().x;
+            threadsHeaderFigure.setConstraint(threadHeaderFigure,
+                new Rectangle(newX, constraint.y, constraint.width,
+                    constraint.height));
+          }
+        }
+
+        @Override
+        public boolean layout(IFigure container) {
+          return false;
+        }
+
+        @Override
+        public void invalidate(IFigure container) {
+        }
+      });
+    }
     // Start loading events
     loadEvents(null);
   }
@@ -121,10 +188,18 @@ public class EventTraceFigure extends Figure implements Observer {
   }
 
   private InvocationThreadFigure getThreadFigure(IInvocationThread thread) {
-    if (!threadFigures.containsKey(thread)) {
+    if (!threadFigureMap.containsKey(thread)) {
+      InvocationThreadHeaderFigure headerFigure = new InvocationThreadHeaderFigure(
+          thread);
+      threadHeaderFigureMap.put(thread, headerFigure);
+
+      threadsHeaderFigure.add(headerFigure);
+      threadsHeaderFigure.setConstraint(headerFigure, new Rectangle(
+          new Rectangle(new Point(0, 0), headerFigure.getPreferredSize())));
+
       InvocationThreadFigure threadFigure = new InvocationThreadFigure(thread);
       threadsLayerLayout.numColumns = threadsLayerLayout.numColumns + 1;
-      threadFigures.put(thread, threadFigure);
+      threadFigureMap.put(thread, threadFigure);
 
       threadsLayer.add(threadFigure);
       GridData gridData = new GridData();
@@ -133,7 +208,7 @@ public class EventTraceFigure extends Figure implements Observer {
       threadsLayerLayout.setConstraint(threadFigure, gridData);
     }
 
-    return threadFigures.get(thread);
+    return threadFigureMap.get(thread);
   }
 
   private static class EventFigure extends Figure {
