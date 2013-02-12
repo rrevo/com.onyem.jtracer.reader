@@ -20,6 +20,8 @@ public interface Constants {
   //  public final int EVENT_FIGURE_FETCH_COUNT = 200;
   //  public final int EVENT_FIGURE_LOAD_PIXELS = 100;
 
+  public final int LOAD_IMAGE_THRESHOLD = 10000;
+
   public final String PROVIDER_NAME = "Onyem";
   public final String APPLICATION_NAME = "JTracer Reader";
 

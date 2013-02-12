@@ -14,6 +14,7 @@ public interface Messages {
   public final String TRACE_LABEL = "Trace";
   public final String OPEN_LABEL = "Open";
   public final String LOADING_LABEL = "Loading ...";
+  public final String LOAD_MORE_LABEL = "Load more Events";
 
   public String ERROR_HEADER = "Error";
 

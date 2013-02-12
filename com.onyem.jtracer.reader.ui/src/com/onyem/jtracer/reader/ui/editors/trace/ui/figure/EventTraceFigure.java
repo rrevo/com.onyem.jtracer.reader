@@ -6,17 +6,24 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.eclipse.draw2d.ActionEvent;
+import org.eclipse.draw2d.ActionListener;
+import org.eclipse.draw2d.Button;
 import org.eclipse.draw2d.ConnectionLayer;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.GridLayout;
 import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Layer;
 import org.eclipse.draw2d.LayeredPane;
 import org.eclipse.draw2d.LayoutListener;
 import org.eclipse.draw2d.ManhattanConnectionRouter;
 import org.eclipse.draw2d.PolylineConnection;
+import org.eclipse.draw2d.RangeModel;
 import org.eclipse.draw2d.ScrollPane;
+import org.eclipse.draw2d.Viewport;
 import org.eclipse.draw2d.XYLayout;
+import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.swt.SWT;
@@ -33,6 +40,8 @@ import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.connector.TopLeftBoun
 import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.events.EventFigureFactory;
 import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.events.InvocationEventFigure;
 import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.layout.LayoutCache;
+import com.onyem.jtracer.reader.ui.util.Constants;
+import com.onyem.jtracer.reader.ui.util.Messages;
 import com.onyem.jtracer.reader.ui.util.SWTUtils;
 
 public class EventTraceFigure extends Figure implements Observer {
@@ -57,6 +66,10 @@ public class EventTraceFigure extends Figure implements Observer {
 
   // Last InvocationEventFigure in event
   private InvocationEventFigure lastEventFigure = null;
+
+  // Load image state
+  private Button loadImage;
+  private int loadCount = 0;
 
   public EventTraceFigure(Trace trace, String eventFileName,
       IQueueService queueService) {
@@ -96,7 +109,7 @@ public class EventTraceFigure extends Figure implements Observer {
 
     // Body
     {
-      ScrollPane scrollPane = new ScrollPane();
+      final ScrollPane scrollPane = new ScrollPane();
       GridData gridData = new GridData();
       gridData.grabExcessHorizontalSpace = true;
       gridData.grabExcessVerticalSpace = true;
@@ -158,7 +171,79 @@ public class EventTraceFigure extends Figure implements Observer {
         public void invalidate(IFigure container) {
         }
       });
+
+      {
+        final Layer loadImagesLayer = new LayeredPane();
+        mainLayer.add(loadImagesLayer, "loadImages");
+
+        final XYLayout xyLayout = new XYLayout();
+        loadImagesLayer.setLayoutManager(xyLayout);
+
+        loadImage = new Button(Messages.LOAD_MORE_LABEL);
+        loadImagesLayer.add(loadImage);
+
+        loadImage.addActionListener(new ActionListener() {
+
+          @Override
+          public void actionPerformed(ActionEvent event) {
+            loadImage.setVisible(false);
+            loadEvents(lastEventFigure.getInvocationEvent());
+          }
+        });
+
+        loadImage.setVisible(false);
+
+        // Make the load image float over the scrollPane 
+        scrollPane.addLayoutListener(new LayoutListener() {
+
+          @Override
+          public void setConstraint(IFigure child, Object constraint) {
+          }
+
+          @Override
+          public void remove(IFigure child) {
+          }
+
+          @Override
+          public void postLayout(IFigure container) {
+            Dimension loadImageSize = loadImage.getPreferredSize();
+            Viewport viewport = scrollPane.getViewport();
+            final Rectangle clientArea = EventTraceFigure.this.getParent()
+                .getClientArea();
+
+            final int clientAreaWidth = clientArea.width;
+            final int clientAreaHeight = clientArea.height;
+
+            RangeModel horizontalModel = viewport.getHorizontalRangeModel();
+            int xValue = -1;
+            if (horizontalModel.getMaximum() > clientAreaWidth) {
+              xValue = horizontalModel.getValue() + horizontalModel.getExtent()
+                  - loadImageSize.width - 10;
+            } else {
+              xValue = clientAreaWidth - loadImageSize.width - 30;
+            }
+            RangeModel verticalModel = viewport.getVerticalRangeModel();
+            if (verticalModel.getMaximum() > clientAreaHeight) {
+              int yValue = verticalModel.getValue() + verticalModel.getExtent()
+                  - loadImageSize.height - 10;
+              xyLayout.setConstraint(loadImage, new Rectangle(new Point(xValue,
+                  yValue), loadImageSize));
+              loadImagesLayer.invalidate();
+            }
+          }
+
+          @Override
+          public boolean layout(IFigure container) {
+            return false;
+          }
+
+          @Override
+          public void invalidate(IFigure container) {
+          }
+        });
+      }
     }
+
     // Start loading events
     loadEvents(null);
   }
@@ -194,9 +279,20 @@ public class EventTraceFigure extends Figure implements Observer {
       addEvent(invocationEvent);
     }
 
-    // Continue loading
+    // Update load count
+    loadCount += newEvents.size();
+
+    // Have all the events been loaded?
     if (!newEvents.isEmpty()) {
-      loadEvents(newEvents.get(newEvents.size() - 1));
+
+      // Stop loading if the threshold has been reached
+      if (loadCount >= Constants.LOAD_IMAGE_THRESHOLD) {
+        loadCount -= Constants.LOAD_IMAGE_THRESHOLD;
+        loadImage.setVisible(true);
+      } else {
+        // Continue loading
+        loadEvents(newEvents.get(newEvents.size() - 1));
+      }
     }
   }
 
