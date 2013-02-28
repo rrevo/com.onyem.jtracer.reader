@@ -3,6 +3,7 @@ package com.onyem.jtracer.reader.ui.editors.trace.ui.figure.events;
 import com.onyem.jtracer.reader.events.model.IInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IMethodEntryInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IMethodExitInvocationEvent;
+import com.onyem.jtracer.reader.events.model.IMethodExitThrowInvocationEvent;
 import com.onyem.jtracer.reader.ui.Activator;
 import com.onyem.jtracer.reader.ui.IImageManager;
 
@@ -28,6 +29,10 @@ public class EventFigureFactory {
           (IMethodExitInvocationEvent) invocationEvent, previousEventFigure,
           previousThreadFigure);
 
+    case MethodThrowExit:
+      return new MethodExitThrowInvocationFigure(imageManager,
+          (IMethodExitThrowInvocationEvent) invocationEvent,
+          previousEventFigure, previousThreadFigure);
     default:
       throw new IllegalArgumentException();
     }

@@ -2,7 +2,7 @@ package com.onyem.jtracer.reader.events.model;
 
 public enum InvocationEventType {
 
-  MethodEntry("+"), MethodExit("-");
+  MethodEntry("+"), MethodExit("-"), MethodThrowExit("-t");
 
   private final String value;
 
@@ -20,6 +20,9 @@ public enum InvocationEventType {
     }
     if (value.equals(MethodExit.value)) {
       return MethodExit;
+    }
+    if (value.equals(MethodThrowExit.value)) {
+      return MethodThrowExit;
     }
     throw new IllegalArgumentException();
   }

@@ -34,6 +34,8 @@ public abstract class AbstractEventTest {
   protected IMetaService metaService;
   protected IEventServiceExtended eventService;
 
+  protected String eventName;
+
   @Before
   public void setup() throws Exception {
     Injector injector = Guice.createInjector(new DbModule(), new MetaModule(),
@@ -63,8 +65,9 @@ public abstract class AbstractEventTest {
         getEventPath());
     file = new File(eventPath);
     RandomAccessFile eventFile = new RandomAccessFile(eventPath, "r");
-    IEventParser eventParser = eventParserFactory.create(file.getName(),
-        eventFile);
+
+    eventName = file.getName();
+    IEventParser eventParser = eventParserFactory.create(eventName, eventFile);
 
     IEventServiceFactory eventFactory = injector
         .getInstance(IEventServiceFactory.class);

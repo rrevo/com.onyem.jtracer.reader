@@ -12,6 +12,7 @@ import com.onyem.jtracer.reader.events.model.IInvocationThread;
 import com.onyem.jtracer.reader.events.model.InvocationEventType;
 import com.onyem.jtracer.reader.events.model.internal.MethodEntryInvocationEvent;
 import com.onyem.jtracer.reader.events.model.internal.MethodExitInvocationEvent;
+import com.onyem.jtracer.reader.events.model.internal.MethodThrowExitInvocationEvent;
 import com.onyem.jtracer.reader.meta.IMetaService;
 import com.onyem.jtracer.reader.meta.IMethod;
 
@@ -44,6 +45,9 @@ class MethodEventRowMapper implements ResultRowMapper<IInvocationEvent> {
       return new MethodEntryInvocationEvent(id, filePosition, thread, method);
     case MethodExit:
       return new MethodExitInvocationEvent(id, filePosition, thread, method);
+    case MethodThrowExit:
+      return new MethodThrowExitInvocationEvent(id, filePosition, thread,
+          method);
 
     default:
       throw new IllegalArgumentException();

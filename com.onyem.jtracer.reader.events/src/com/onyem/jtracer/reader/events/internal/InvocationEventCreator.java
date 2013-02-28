@@ -14,6 +14,7 @@ import com.onyem.jtracer.reader.events.model.IInvocationThread;
 import com.onyem.jtracer.reader.events.model.InvocationEventType;
 import com.onyem.jtracer.reader.events.model.internal.MethodEntryInvocationEvent;
 import com.onyem.jtracer.reader.events.model.internal.MethodExitInvocationEvent;
+import com.onyem.jtracer.reader.events.model.internal.MethodThrowExitInvocationEvent;
 import com.onyem.jtracer.reader.meta.IMetaService;
 import com.onyem.jtracer.reader.meta.IMethod;
 import com.onyem.jtracer.reader.parser.ILine;
@@ -73,7 +74,9 @@ public class InvocationEventCreator {
     case MethodExit:
       return new MethodExitInvocationEvent(Constants.NULL_ID, position, thread,
           method);
-
+    case MethodThrowExit:
+      return new MethodThrowExitInvocationEvent(Constants.NULL_ID, position,
+          thread, method);
     default:
       throw new IllegalArgumentException();
     }
