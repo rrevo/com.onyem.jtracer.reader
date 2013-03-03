@@ -6,7 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({ MetaClassTest.class, MetaMethodTest.class, PrimitiveTest.class,
-    SignatureTest.class })
+    SignatureTest.class, MetaPartialLoadTest.class })
 public class AllTestsMeta {
 
 }

@@ -42,16 +42,34 @@ public class MethodDAO {
 
   @Transactional
   public IMethod getMethodByMetaId(final long metaId) {
-    return getMethodBy(metaId, "M.META_ID = ?");
+    return getMethodBy(new LongParameterSource(metaId), "M.META_ID = ?");
   }
 
   @Transactional
   public IMethod getMethodById(long id) {
-    return getMethodBy(id, "M.ID = ?");
+    return getMethodBy(new LongParameterSource(id), "M.ID = ?");
   }
 
-  private IMethod getMethodBy(long idValue, String whereClause) {
-    ParameterSource parameterSource = new LongParameterSource(idValue);
+  @Transactional
+  public IMethod getMethodByName(final IClass clazz, final String name,
+      final String description) {
+    ParameterSource parameterSource = new ParameterSource() {
+
+      @Override
+      public void setParameters(PreparedStatement statement)
+          throws SQLException {
+        statement.setLong(1, clazz.getId());
+        statement.setString(2, name);
+        statement.setString(3, description);
+      }
+    };
+
+    String whereClause = "M.CLASS_ID = ? AND M.NAME = ? AND M.DESCRIPTION = ?";
+    return getMethodBy(parameterSource, whereClause);
+  }
+
+  private IMethod getMethodBy(ParameterSource parameterSource,
+      String whereClause) {
     MethodResultRowMapper methodResultRowMapper = new MethodResultRowMapper(
         metaService);
 

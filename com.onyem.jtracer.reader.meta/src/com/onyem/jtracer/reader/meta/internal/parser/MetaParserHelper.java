@@ -15,6 +15,7 @@ import com.onyem.jtracer.reader.meta.IMethod;
 import com.onyem.jtracer.reader.meta.internal.ClassFactory;
 import com.onyem.jtracer.reader.meta.internal.ClassNameUtils;
 import com.onyem.jtracer.reader.meta.internal.IMetaServiceExtended;
+import com.onyem.jtracer.reader.meta.internal.MetaService;
 import com.onyem.jtracer.reader.meta.internal.MethodImpl;
 import com.onyem.jtracer.reader.meta.internal.TypeConstants;
 
@@ -158,14 +159,14 @@ public class MetaParserHelper {
     }
   }
 
-  private IClass getReturnType(IMetaServiceExtended metaService,
+  public IClass getReturnType(IMetaServiceExtended metaService,
       String description) {
     int returnIndex = description.indexOf(")");
     String returnTypeName = description.substring(returnIndex + 1);
     return metaService.getClassByCanonicalName(returnTypeName);
   }
 
-  private List<IClass> getParameters(IMetaServiceExtended metaService,
+  public List<IClass> getParameters(IMetaServiceExtended metaService,
       String description) {
     int returnIndex = description.indexOf(")");
     String classNamesStream = description.substring(1, returnIndex);
@@ -209,5 +210,12 @@ public class MetaParserHelper {
     } else {
       throw new RuntimeException();
     }
+  }
+
+  public IMethod getMethodFromName(MetaService metaService, String name,
+      String description, IClass returnType, List<IClass> parameters,
+      IClass clazz) {
+    return MethodImpl.createMethod(Constants.NULL_ID, null, null, name, clazz,
+        parameters, returnType, new ArrayList<IClass>(), description, null);
   }
 }

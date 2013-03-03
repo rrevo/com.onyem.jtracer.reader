@@ -1,6 +1,7 @@
 package com.onyem.jtracer.reader.meta.internal;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.annotation.concurrent.ThreadSafe;
 
@@ -61,6 +62,12 @@ public class MetaService implements IMetaServiceExtended {
       clazz = classDAO.insertClass(classFromLine);
     }
     return clazz;
+  }
+
+  @Override
+  public synchronized IClass getPlainClassByName(String name) {
+    name = nameUtils.getCanonicalClassName(name);
+    return getClassByCanonicalName(name);
   }
 
   @Override
@@ -131,5 +138,26 @@ public class MetaService implements IMetaServiceExtended {
   public synchronized IMethod getMethodById(long id) {
     IMethod method = methodDAO.getMethodById(id);
     return method;
+  }
+
+  /*
+   * For traced classes, the exception throw will be followed only after method
+   * entry events. So the traced classes should be found in the db
+   * For untraced classes, partial method data should be inserted into the db
+   */
+  @Override
+  public synchronized IMethod getMethodByNameDescription(String name,
+      String description, IClass clazz) {
+    // Validate the description and insert the classes if necessary
+    IClass returnType = metaParserHelper.getReturnType(this, description);
+    List<IClass> parameters = metaParserHelper.getParameters(this, description);
+    IMethod method = methodDAO.getMethodByName(clazz, name, description);
+    if (method != null) {
+      return method;
+    } else {
+      IMethod methodFromName = metaParserHelper.getMethodFromName(this, name,
+          description, returnType, parameters, clazz);
+      return methodDAO.insertMethod(methodFromName);
+    }
   }
 }
