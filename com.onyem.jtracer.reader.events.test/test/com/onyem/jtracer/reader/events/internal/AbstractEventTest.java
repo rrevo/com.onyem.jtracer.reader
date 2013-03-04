@@ -3,6 +3,7 @@ package com.onyem.jtracer.reader.events.internal;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.List;
 
 import junit.framework.Assert;
 
@@ -18,8 +19,10 @@ import com.onyem.jtracer.reader.events.factory.EventModule;
 import com.onyem.jtracer.reader.events.factory.IEventServiceFactory;
 import com.onyem.jtracer.reader.events.model.IInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IMethodInvocationEvent;
+import com.onyem.jtracer.reader.events.model.IMethodTraceInvocationEvent;
 import com.onyem.jtracer.reader.events.model.InvocationEventType;
 import com.onyem.jtracer.reader.meta.IMetaService;
+import com.onyem.jtracer.reader.meta.IMethod;
 import com.onyem.jtracer.reader.meta.factory.IMetaServiceFactory;
 import com.onyem.jtracer.reader.meta.factory.MetaModule;
 import com.onyem.jtracer.reader.parser.IEventParser;
@@ -96,5 +99,23 @@ public abstract class AbstractEventTest {
     Assert.assertEquals(threadId, methodEvent.getThread().getId());
     Assert.assertEquals(methodId, methodEvent.getMethod().getMetaId()
         .longValue());
+  }
+
+  protected void assertTraceEvent(IInvocationEvent event,
+      InvocationEventType type, long threadId, String[] traceData) {
+    IMethodTraceInvocationEvent traceEvent = (IMethodTraceInvocationEvent) event;
+    Assert.assertEquals(type, traceEvent.getType());
+    Assert.assertEquals(threadId, traceEvent.getThread().getId());
+    List<IMethod> trace = traceEvent.getMethodTrace();
+    Assert.assertEquals(traceData.length, trace.size() * 3);
+
+    for (int i = 0; i < trace.size(); i++) {
+      IMethod method = trace.get(i);
+      Assert.assertEquals("L" + traceData[i * 3] + ";", method.getIClass()
+          .getCanonicalName());
+      Assert.assertEquals(traceData[i * 3 + 1], method.getName());
+      Assert.assertEquals(traceData[i * 3 + 2],
+          method.getCanonicalDescription());
+    }
   }
 }
