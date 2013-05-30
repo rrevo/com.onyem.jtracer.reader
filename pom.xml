@@ -25,6 +25,7 @@
 		<module>onyem.com.google.inject</module>
 		<module>onyem.org.h2</module>
 		<module>onyem.org.apache.commons.dbcp</module>
+		<module>onyem.org.mockito</module>
 		
 		<module>com.onyem.jtracer.reader.common</module>
 		<module>com.onyem.jtracer.reader.queue</module>
