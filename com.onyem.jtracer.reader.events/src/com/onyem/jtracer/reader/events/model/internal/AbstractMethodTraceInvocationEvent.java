@@ -8,7 +8,7 @@ import com.onyem.jtracer.reader.events.model.IMethodTraceInvocationEvent;
 import com.onyem.jtracer.reader.events.model.InvocationEventType;
 import com.onyem.jtracer.reader.meta.IMethod;
 
-abstract class AbstractMethodTraceInvocationEvent extends
+public abstract class AbstractMethodTraceInvocationEvent extends
     AbstractInvocationEvent implements IMethodTraceInvocationEvent {
 
   protected final List<IMethod> methodTrace;

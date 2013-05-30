@@ -15,8 +15,8 @@ import com.onyem.jtracer.reader.db.PreparedStatementCreator;
 import com.onyem.jtracer.reader.db.Transactional;
 import com.onyem.jtracer.reader.db.factory.IJdbcHelperFactory;
 import com.onyem.jtracer.reader.db.util.LongParameterSource;
-import com.onyem.jtracer.reader.events.internal.InvocationThread;
 import com.onyem.jtracer.reader.events.model.IInvocationThread;
+import com.onyem.jtracer.reader.events.model.internal.InvocationThread;
 
 @DAO
 @Immutable

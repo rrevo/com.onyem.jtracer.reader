@@ -2,17 +2,25 @@ package com.onyem.jtracer.reader.events.model;
 
 public enum InvocationEventType {
 
-  MethodEntry("+"), MethodExit("-"), MethodThrowExit("-t"), ExceptionThrow("et"), ExceptionCatch(
-      "ec");
+  MethodEntry("+", true), MethodExit("-", true), MethodThrowExit("-t", true), ExceptionThrow(
+      "et", true), ExceptionCatch("ec", true), Loop("lo", false);
+
+  public static int NULL = -1;
 
   private final String value;
+  private final boolean existsInTrace;
 
-  private InvocationEventType(String value) {
+  private InvocationEventType(String value, boolean existsInTrace) {
     this.value = value;
+    this.existsInTrace = existsInTrace;
   }
 
   public String getValue() {
     return value;
+  }
+
+  public boolean isExistsInTrace() {
+    return existsInTrace;
   }
 
   public static InvocationEventType parseString(String value) {

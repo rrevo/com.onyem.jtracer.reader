@@ -7,4 +7,5 @@ Bundle-Vendor: Onyem
 Fragment-Host: com.onyem.jtracer.reader.events
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit,
- com.onyem.jtracer.reader.utils
+ com.onyem.jtracer.reader.utils,
+ onyem.org.mockito

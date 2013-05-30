@@ -21,6 +21,8 @@ import com.onyem.jtracer.reader.events.model.IInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IMethodInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IMethodTraceInvocationEvent;
 import com.onyem.jtracer.reader.events.model.InvocationEventType;
+import com.onyem.jtracer.reader.events.model.internal.InvocationEventComparator;
+import com.onyem.jtracer.reader.events.model.internal.InvocationLoopEvent;
 import com.onyem.jtracer.reader.meta.IMetaService;
 import com.onyem.jtracer.reader.meta.IMethod;
 import com.onyem.jtracer.reader.meta.factory.IMetaServiceFactory;
@@ -38,6 +40,8 @@ public abstract class AbstractEventTest {
   protected IEventServiceExtended eventService;
 
   protected String eventName;
+
+  private static final InvocationEventComparator EVENT_COMPARATOR = new InvocationEventComparator();
 
   @Before
   public void setup() throws Exception {
@@ -92,13 +96,26 @@ public abstract class AbstractEventTest {
     return IEventServiceExtended.DEFAULT_EVENTS_COUNT;
   }
 
-  protected void assertEvent(InvocationEventType type, long threadId,
-      long methodId, IInvocationEvent event) {
+  public static void assertEvent(InvocationEventType type, long threadId,
+      long methodMetaId, IInvocationEvent event) {
     IMethodInvocationEvent methodEvent = (IMethodInvocationEvent) event;
     Assert.assertEquals(type, methodEvent.getType());
     Assert.assertEquals(threadId, methodEvent.getThread().getId());
-    Assert.assertEquals(methodId, methodEvent.getMethod().getMetaId()
+    Assert.assertEquals(methodMetaId, methodEvent.getMethod().getMetaId()
         .longValue());
+  }
+
+  public static void assertLoopEvent(long threadId, IInvocationEvent event,
+      final int count, IInvocationEvent... expectedLoopEvents) {
+    InvocationLoopEvent loopEvent = (InvocationLoopEvent) event;
+    Assert.assertEquals(count, loopEvent.getLoopCount());
+    List<IInvocationEvent> loopEvents = loopEvent.getEvents();
+    Assert.assertTrue(expectedLoopEvents.length > 0);
+    Assert.assertEquals(expectedLoopEvents.length, loopEvents.size());
+    for (int i = 0; i < expectedLoopEvents.length; i++) {
+      Assert.assertTrue(EVENT_COMPARATOR.compare(loopEvents.get(i),
+          expectedLoopEvents[i]));
+    }
   }
 
   protected void assertTraceEvent(IInvocationEvent event,

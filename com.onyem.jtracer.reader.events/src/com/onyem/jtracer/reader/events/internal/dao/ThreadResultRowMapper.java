@@ -6,8 +6,8 @@ import java.sql.SQLException;
 import javax.annotation.concurrent.Immutable;
 
 import com.onyem.jtracer.reader.db.ResultRowMapper;
-import com.onyem.jtracer.reader.events.internal.InvocationThread;
 import com.onyem.jtracer.reader.events.model.IInvocationThread;
+import com.onyem.jtracer.reader.events.model.internal.InvocationThread;
 
 @Immutable
 class ThreadResultRowMapper implements ResultRowMapper<IInvocationThread> {

@@ -8,6 +8,10 @@ import java.util.List;
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.onyem.jtracer.reader.annotations.Service;
+import com.onyem.jtracer.reader.events.EventLoadOptions;
+import com.onyem.jtracer.reader.events.internal.converter.IEventConverter;
+import com.onyem.jtracer.reader.events.internal.converter.LoopEventLoader;
+import com.onyem.jtracer.reader.events.internal.converter.NullConverter;
 import com.onyem.jtracer.reader.events.internal.dao.EventFileDAO;
 import com.onyem.jtracer.reader.events.internal.dao.EventsDAO;
 import com.onyem.jtracer.reader.events.internal.dao.ThreadDAO;
@@ -66,62 +70,92 @@ public class EventService implements IEventServiceExtended {
   @Override
   public synchronized List<IInvocationEvent> getNextEvent(
       IInvocationEvent startEvent) {
+    return getNextEvent(new EventLoadOptions(), startEvent);
+  }
+
+  @Override
+  public List<IInvocationEvent> getNextEvent(EventLoadOptions loadOptions,
+      IInvocationEvent startEvent) {
+    IEventConverter eventConverter = loadOptions.isEnableLoopEvents() ? new LoopEventLoader(
+        eventsLoadCount) : new NullConverter(eventsLoadCount);
+
     EventFile eventFile = eventFileDAO.getOrInsertEventFileByName(name);
-    if (startEvent == null && eventFile.getFirstEvent() == null) {
+    return getNextEvents(eventFile, startEvent, eventConverter);
+  }
+
+  private IInvocationEvent getFirstEvent(EventFile eventFile) {
+    if (eventFile.getFirstEvent() == null) {
+      // eventFile has never been parsed and so the firstEvent is not
+      // in the database
       List<IInvocationEvent> events = getEventsFromParser(
           IEventParser.START_POSITION, eventFile, 1);
       IInvocationEvent firstEvent = events.get(0);
       eventFileDAO.insertFirstEvent(eventFile, firstEvent);
-      events.addAll(getNextEvent(eventFile, firstEvent, eventsLoadCount - 1));
-      return Collections.unmodifiableList(events);
+      return firstEvent;
     } else {
-      return getNextEvent(eventFile, startEvent, eventsLoadCount);
+      return eventFile.getFirstEvent();
     }
   }
 
-  private List<IInvocationEvent> getNextEvent(EventFile eventFile,
-      IInvocationEvent startEvent, int count) {
-    List<IInvocationEvent> events = new ArrayList<IInvocationEvent>();
+  private List<IInvocationEvent> getNextEvents(EventFile eventFile,
+      IInvocationEvent startEvent, IEventConverter eventConverter) {
+    boolean dbContainsEvents = true;
+    boolean complete = false;
 
-    // Can we get all the events from the DB?
-    events.addAll(eventsDAO.getEventsAfterId(startEvent, count));
+    while (!complete && eventConverter.loadMoreEvents()) {
 
-    if (events.size() < count) {
-      IInvocationEvent lastEvent = events.isEmpty() ? startEvent : events
-          .get(events.size() - 1);
+      if (startEvent == null) {
+        startEvent = getFirstEvent(eventFile);
+        eventConverter.convertEvents(Collections.singletonList(startEvent),
+            complete);
 
-      // Continue from parser if we are not at the end of the file?
-      if (!lastEvent.equals(eventFile.getLastEvent())) {
+      } else if (dbContainsEvents) {
+        // Can we get events from the DB?
+        List<IInvocationEvent> dbEvents = eventsDAO.getEventsAfterId(
+            startEvent, eventConverter.getFetchCount());
+        if (dbEvents.isEmpty()) {
+          dbContainsEvents = false;
+        } else {
+          startEvent = dbEvents.get(dbEvents.size() - 1);
+          eventConverter.convertEvents(dbEvents, complete);
+        }
 
+      } else if (eventFile.getLastEvent() != null
+          && startEvent.equals(eventFile.getLastEvent())) {
+        complete = true;
+        List<IInvocationEvent> none = Collections.emptyList();
+        eventConverter.convertEvents(none, complete);
+
+      } else {
+        // Continue from parser if we are not at the end of the file?
         // Since we are parsing more then the end of the file has not been reached
         assert eventFile.getLastEvent() == null;
 
-        long continueStartPosition = lastEvent.getFilePosition();
+        long continueStartPosition = startEvent.getFilePosition();
         List<IInvocationEvent> eventsFromParser = getEventsFromParser(
-            continueStartPosition, eventFile, count - events.size());
+            continueStartPosition, eventFile, eventConverter.getFetchCount());
 
         // Since even the parser does not have more events we have reached 
         // the end of the file
-        if ((events.size() + eventsFromParser.size()) < count) {
+        if (eventsFromParser.size() < eventConverter.getFetchCount()) {
           IInvocationEvent finalEvent = null;
 
           if (!eventsFromParser.isEmpty()) {
             finalEvent = eventsFromParser.get(eventsFromParser.size() - 1);
-          } else if (!events.isEmpty()) {
-            finalEvent = events.get(events.size() - 1);
-          } else if (startEvent != null) {
+          } else {
             finalEvent = startEvent;
           }
 
+          complete = true;
           if (finalEvent != null) {
             eventFileDAO.insertLastEvent(eventFile, finalEvent);
           }
         }
         // Add all the events from parser
-        events.addAll(eventsFromParser);
+        eventConverter.convertEvents(eventsFromParser, complete);
       }
     }
-    return Collections.unmodifiableList(events);
+    return Collections.unmodifiableList(eventConverter.getEvents());
   }
 
   private List<IInvocationEvent> getEventsFromParser(long startPosition,

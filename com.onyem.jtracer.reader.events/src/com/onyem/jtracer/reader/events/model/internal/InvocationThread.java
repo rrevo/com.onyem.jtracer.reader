@@ -1,4 +1,4 @@
-package com.onyem.jtracer.reader.events.internal;
+package com.onyem.jtracer.reader.events.model.internal;
 
 import javax.annotation.concurrent.Immutable;
 

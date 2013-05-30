@@ -4,7 +4,7 @@ import com.onyem.jtracer.reader.events.model.IInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IInvocationThread;
 import com.onyem.jtracer.reader.events.model.InvocationEventType;
 
-abstract class AbstractInvocationEvent implements IInvocationEvent {
+public abstract class AbstractInvocationEvent implements IInvocationEvent {
 
   protected final long id;
   protected final long filePosition;
