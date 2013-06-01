@@ -84,6 +84,10 @@ public class EventsDAO {
               + count, rowMapper);
       return rowMapper.getEvents();
     } else {
+      if (!event.getType().isExistsInTrace()) {
+        throw new IllegalArgumentException("Invalid event: " + event);
+      }
+
       ParameterSource parameterSource = new LongParameterSource(event.getId());
       MethodEventRowMapper rowMapper = new MethodEventRowMapper(metaService,
           eventService);

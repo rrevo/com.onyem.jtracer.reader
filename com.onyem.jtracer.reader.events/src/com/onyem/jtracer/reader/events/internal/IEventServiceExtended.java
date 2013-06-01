@@ -6,8 +6,6 @@ import com.onyem.jtracer.reader.events.model.IInvocationThread;
 
 public interface IEventServiceExtended extends IEventService {
 
-  int DEFAULT_EVENTS_COUNT = 20;
-
   IInvocationEvent getEventById(long id);
 
   IInvocationThread getOrInsertThreadById(long threadId);

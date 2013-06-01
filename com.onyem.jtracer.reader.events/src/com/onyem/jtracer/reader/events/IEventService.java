@@ -16,16 +16,6 @@ public interface IEventService extends Closeable {
   public List<IInvocationEvent> getNextEvent(IInvocationEvent startEvent);
 
   /*
-   * Returns List of IInvocationEvents after the startEvent
-   * To get the first events, startEvent == null
-   * For the last event in a event file, an empty List is returned
-   * 
-   * EventLoadOptions also take effect
-   */
-  public List<IInvocationEvent> getNextEvent(EventLoadOptions loadOptions,
-      IInvocationEvent startEvent);
-
-  /*
    * Load all the events into the db from the event files in a
    * background job at lower priority
    */

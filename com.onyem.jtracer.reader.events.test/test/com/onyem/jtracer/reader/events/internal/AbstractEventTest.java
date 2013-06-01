@@ -15,6 +15,7 @@ import com.google.inject.Injector;
 import com.onyem.jtracer.reader.db.IConnectionManager;
 import com.onyem.jtracer.reader.db.factory.DbModule;
 import com.onyem.jtracer.reader.db.factory.IConnectionManagerFactory;
+import com.onyem.jtracer.reader.events.EventLoadOptions;
 import com.onyem.jtracer.reader.events.factory.EventModule;
 import com.onyem.jtracer.reader.events.factory.IEventServiceFactory;
 import com.onyem.jtracer.reader.events.model.IInvocationEvent;
@@ -78,8 +79,13 @@ public abstract class AbstractEventTest {
 
     IEventServiceFactory eventFactory = injector
         .getInstance(IEventServiceFactory.class);
+
+    EventLoadOptions loadOptions = new EventLoadOptions();
+    loadOptions.setEventsLoadCount(getEventCount());
+    loadOptions.setEnableLoopEvents(isLoopsEnabled());
+
     eventService = (IEventServiceExtended) eventFactory.create(manager,
-        eventParser, metaService, getEventCount());
+        eventParser, metaService, loadOptions);
   }
 
   @After
@@ -93,7 +99,11 @@ public abstract class AbstractEventTest {
   abstract String getEventPath();
 
   protected int getEventCount() {
-    return IEventServiceExtended.DEFAULT_EVENTS_COUNT;
+    return EventLoadOptions.DEFAULT_EVENTS_COUNT;
+  }
+
+  protected boolean isLoopsEnabled() {
+    return false;
   }
 
   public static void assertEvent(InvocationEventType type, long threadId,
@@ -118,7 +128,7 @@ public abstract class AbstractEventTest {
     }
   }
 
-  protected void assertTraceEvent(IInvocationEvent event,
+  public static void assertTraceEvent(IInvocationEvent event,
       InvocationEventType type, long threadId, String[] traceData) {
     IMethodTraceInvocationEvent traceEvent = (IMethodTraceInvocationEvent) event;
     Assert.assertEquals(type, traceEvent.getType());

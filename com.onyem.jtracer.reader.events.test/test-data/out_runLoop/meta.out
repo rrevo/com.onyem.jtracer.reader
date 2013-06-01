@@ -1,0 +1,7 @@
+<ic|0|50|33|org/world/Loop||java/lang/Object|java/lang/Runnable,|>
+<im|1|0|1|<init>|()V|||>
+<im|2|0|9|main|([Ljava/lang/String;)V|||>
+<im|3|0|1|run|()V|||>
+<im|4|0|1|allo|()V|||>
+<im|5|0|1|sayonara|()V|||>
+<im|6|0|1|recurse|(I)V|||>

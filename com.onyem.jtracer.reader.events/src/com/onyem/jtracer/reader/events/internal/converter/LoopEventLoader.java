@@ -24,6 +24,9 @@ public class LoopEventLoader implements IEventConverter {
 
   private static final int EXTRA_LOAD_COUNT = 25;
 
+  // How many events need to be searched for the corresponding exit for an entry?
+  private static final int MAX_EXIT_EVENT_SEARCH = 100;
+
   public LoopEventLoader(int count) {
     this.count = count;
     events = new ArrayList<IInvocationEvent>();
@@ -40,11 +43,14 @@ public class LoopEventLoader implements IEventConverter {
       return;
     }
 
+    List<IInvocationEvent> localEvents = new ArrayList<IInvocationEvent>(
+        newEvents);
+
     // Add the delayed events
-    newEvents.addAll(0, delayedEvents);
+    localEvents.addAll(0, delayedEvents);
     delayedEvents.clear();
 
-    List<List<IInvocationEvent>> threadList = groupEventsByThread(newEvents);
+    List<List<IInvocationEvent>> threadList = groupEventsByThread(localEvents);
     IInvocationEvent newEvent = getNextEvent(threadList, complete);
     while (loadMoreEvents() && newEvent != null) {
       events.add(newEvent);
@@ -175,12 +181,22 @@ public class LoopEventLoader implements IEventConverter {
    */
   private int getFirstExitEvent(IMethodEntryInvocationEvent entryEvent,
       List<IInvocationEvent> events) {
+    int stackDepth = 1;
     for (int i = 0; i < events.size(); i++) {
       IInvocationEvent event = events.get(i);
       if (event.getType() == InvocationEventType.MethodExit) {
         IMethodExitInvocationEvent exitEvent = (IMethodExitInvocationEvent) event;
         if (exitEvent.getMethod().equals(entryEvent.getMethod())) {
-          return i;
+          if (stackDepth == 1) {
+            return i;
+          } else {
+            stackDepth--;
+          }
+        }
+      } else if (event.getType() == InvocationEventType.MethodEntry) {
+        IMethodEntryInvocationEvent otherEntryEvent = (IMethodEntryInvocationEvent) event;
+        if (otherEntryEvent.getMethod().equals(entryEvent.getMethod())) {
+          stackDepth++;
         }
       }
     }
@@ -199,6 +215,10 @@ public class LoopEventLoader implements IEventConverter {
    */
   private boolean isExitEventUnknown(IMethodEntryInvocationEvent entryEvent,
       List<IInvocationEvent> events) {
+
+    if (events.size() > MAX_EXIT_EVENT_SEARCH) {
+      return false;
+    }
     return true;
   }
 

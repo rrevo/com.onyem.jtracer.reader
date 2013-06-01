@@ -1,4 +1,4 @@
-package com.onyem.jtracer.reader.events.internal.looptests;
+package com.onyem.jtracer.reader.events.internal;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -16,7 +16,7 @@ import com.onyem.jtracer.reader.events.model.internal.MethodEntryInvocationEvent
 import com.onyem.jtracer.reader.events.model.internal.MethodExitInvocationEvent;
 import com.onyem.jtracer.reader.meta.IMethod;
 
-class Factory {
+public class Factory {
 
   private static final int NULL_POSITION = -1;
   private final AtomicLong generator;

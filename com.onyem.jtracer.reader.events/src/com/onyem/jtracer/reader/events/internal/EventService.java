@@ -16,7 +16,9 @@ import com.onyem.jtracer.reader.events.internal.dao.EventFileDAO;
 import com.onyem.jtracer.reader.events.internal.dao.EventsDAO;
 import com.onyem.jtracer.reader.events.internal.dao.ThreadDAO;
 import com.onyem.jtracer.reader.events.model.IInvocationEvent;
+import com.onyem.jtracer.reader.events.model.IInvocationLoopEvent;
 import com.onyem.jtracer.reader.events.model.IInvocationThread;
+import com.onyem.jtracer.reader.events.model.InvocationEventType;
 import com.onyem.jtracer.reader.parser.IEventParser;
 import com.onyem.jtracer.reader.parser.ILine;
 import com.onyem.jtracer.reader.queue.IQueueService;
@@ -25,6 +27,8 @@ import com.onyem.jtracer.reader.queue.IQueueService;
 @ThreadSafe
 public class EventService implements IEventServiceExtended {
 
+  // Options
+  private final boolean enableLoopEvents;
   private final int eventsLoadCount;
 
   private final String name;
@@ -35,13 +39,17 @@ public class EventService implements IEventServiceExtended {
   private ThreadDAO threadDAO;
 
   public EventService(IEventParser eventParser,
-      InvocationEventCreator eventCreator, int eventsLoadCount) {
+      InvocationEventCreator eventCreator, EventLoadOptions loadOptions) {
     name = eventParser.getName();
     this.eventParser = eventParser;
     this.eventCreator = eventCreator;
-    this.eventsLoadCount = eventsLoadCount;
 
-    assert eventsLoadCount > 0;
+    enableLoopEvents = loadOptions.isEnableLoopEvents();
+    eventsLoadCount = loadOptions.getEventsLoadCount();
+
+    if (eventsLoadCount <= 0) {
+      throw new IllegalArgumentException();
+    }
   }
 
   synchronized void setEventFileDAO(EventFileDAO eventFileDAO) {
@@ -68,15 +76,8 @@ public class EventService implements IEventServiceExtended {
   }
 
   @Override
-  public synchronized List<IInvocationEvent> getNextEvent(
-      IInvocationEvent startEvent) {
-    return getNextEvent(new EventLoadOptions(), startEvent);
-  }
-
-  @Override
-  public List<IInvocationEvent> getNextEvent(EventLoadOptions loadOptions,
-      IInvocationEvent startEvent) {
-    IEventConverter eventConverter = loadOptions.isEnableLoopEvents() ? new LoopEventLoader(
+  public List<IInvocationEvent> getNextEvent(IInvocationEvent startEvent) {
+    IEventConverter eventConverter = enableLoopEvents ? new LoopEventLoader(
         eventsLoadCount) : new NullConverter(eventsLoadCount);
 
     EventFile eventFile = eventFileDAO.getOrInsertEventFileByName(name);
@@ -109,6 +110,10 @@ public class EventService implements IEventServiceExtended {
         eventConverter.convertEvents(Collections.singletonList(startEvent),
             complete);
 
+      } else if (startEvent.getType() == InvocationEventType.Loop) {
+        IInvocationEvent lastLoopEvent = getLastLoopEvent(eventFile,
+            (IInvocationLoopEvent) startEvent);
+        return getNextEvents(eventFile, lastLoopEvent, eventConverter);
       } else if (dbContainsEvents) {
         // Can we get events from the DB?
         List<IInvocationEvent> dbEvents = eventsDAO.getEventsAfterId(
@@ -153,9 +158,66 @@ public class EventService implements IEventServiceExtended {
         }
         // Add all the events from parser
         eventConverter.convertEvents(eventsFromParser, complete);
+
+        // Change the startEvent
+        if (!eventsFromParser.isEmpty()) {
+          startEvent = eventsFromParser.get(eventsFromParser.size() - 1);
+        }
       }
     }
     return Collections.unmodifiableList(eventConverter.getEvents());
+  }
+
+  /*
+   * Returns the last IInvocationEvent that is present in the database after
+   * "un-looping" the IInvocationLoopEvent
+   */
+  private IInvocationEvent getLastLoopEvent(EventFile eventFile,
+      IInvocationLoopEvent loopEvent) {
+    int totalEvents = getUnloopEventCount(loopEvent);
+    List<IInvocationEvent> skipEvents = getNextEvents(eventFile,
+        getFirstUnLoopEvent(loopEvent), new NullConverter(totalEvents - 1));
+    return skipEvents.get(skipEvents.size() - 1);
+  }
+
+  private IInvocationEvent getFirstUnLoopEvent(IInvocationLoopEvent loopEvent) {
+    IInvocationEvent event = loopEvent.getEvents().get(0);
+    switch (event.getType()) {
+    case MethodEntry:
+    case MethodExit:
+    case MethodThrowExit:
+    case ExceptionThrow:
+    case ExceptionCatch:
+      return event;
+    case Loop:
+      IInvocationLoopEvent nestedLoopEvent = (IInvocationLoopEvent) event;
+      return getFirstUnLoopEvent(nestedLoopEvent);
+    default:
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  private int getUnloopEventCount(IInvocationLoopEvent loopEvent) {
+    int count = 0;
+    List<IInvocationEvent> events = loopEvent.getEvents();
+    for (IInvocationEvent event : events) {
+      switch (event.getType()) {
+      case MethodEntry:
+      case MethodExit:
+      case MethodThrowExit:
+      case ExceptionThrow:
+      case ExceptionCatch:
+        count++;
+        break;
+      case Loop:
+        IInvocationLoopEvent nestedLoopEvent = (IInvocationLoopEvent) event;
+        count = count + getUnloopEventCount(nestedLoopEvent);
+        break;
+      default:
+        throw new UnsupportedOperationException();
+      }
+    }
+    return count * loopEvent.getLoopCount();
   }
 
   private List<IInvocationEvent> getEventsFromParser(long startPosition,

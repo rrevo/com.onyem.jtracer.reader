@@ -1,8 +1,14 @@
 package com.onyem.jtracer.reader.ui.editors.trace.ui.figure.events;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.draw2d.ConnectionLayer;
+
 import com.onyem.jtracer.reader.events.model.IExceptionCatchInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IExceptionThrowInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IInvocationEvent;
+import com.onyem.jtracer.reader.events.model.IInvocationLoopEvent;
 import com.onyem.jtracer.reader.events.model.IMethodEntryInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IMethodExitInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IMethodExitThrowInvocationEvent;
@@ -22,7 +28,8 @@ public class EventFigureFactory {
 
   public InvocationEventFigure create(IInvocationEvent invocationEvent,
       InvocationEventFigure previousEventFigure,
-      InvocationEventFigure previousThreadFigure) {
+      InvocationEventFigure previousThreadFigure,
+      ConnectionLayer connectionsLayer) {
     switch (invocationEvent.getType()) {
     case MethodEntry:
       return new MethodEntryInvocationFigure(imageManager,
@@ -49,8 +56,30 @@ public class EventFigureFactory {
           (IExceptionCatchInvocationEvent) invocationEvent,
           previousEventFigure, previousThreadFigure, classTraceChecker);
 
+    case Loop:
+      IInvocationLoopEvent loopEvent = (IInvocationLoopEvent) invocationEvent;
+      List<InvocationEventFigure> loopFigures = createLoopEventFigures(
+          loopEvent, connectionsLayer);
+      return new LoopInvocationFigure(imageManager, loopEvent, loopFigures,
+          previousEventFigure, previousThreadFigure, connectionsLayer);
+
     default:
       throw new IllegalArgumentException();
     }
+  }
+
+  private List<InvocationEventFigure> createLoopEventFigures(
+      IInvocationLoopEvent loopEvent, ConnectionLayer connectionsLayer) {
+    InvocationEventFigure previousStreamFigure = null;
+    InvocationEventFigure previousThreadFigure = null;
+    List<InvocationEventFigure> loopEventFigures = new ArrayList<InvocationEventFigure>();
+    for (IInvocationEvent event : loopEvent.getEvents()) {
+      InvocationEventFigure loopEventFigure = create(event,
+          previousStreamFigure, previousThreadFigure, connectionsLayer);
+      loopEventFigures.add(loopEventFigure);
+      previousStreamFigure = loopEventFigure;
+      previousThreadFigure = loopEventFigure;
+    }
+    return loopEventFigures;
   }
 }

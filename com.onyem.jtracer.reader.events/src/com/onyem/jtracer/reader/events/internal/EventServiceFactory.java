@@ -2,8 +2,8 @@ package com.onyem.jtracer.reader.events.internal;
 
 import javax.inject.Inject;
 
-import com.google.inject.assistedinject.Assisted;
 import com.onyem.jtracer.reader.db.IConnectionManager;
+import com.onyem.jtracer.reader.events.EventLoadOptions;
 import com.onyem.jtracer.reader.events.IEventService;
 import com.onyem.jtracer.reader.events.factory.IEventServiceFactory;
 import com.onyem.jtracer.reader.events.factory.internal.EventFileDAOFactory;
@@ -37,17 +37,17 @@ public class EventServiceFactory implements IEventServiceFactory {
   public IEventService create(IConnectionManager connectionManager,
       IEventParser eventParser, IMetaService metaService) {
     return create(connectionManager, eventParser, metaService,
-        IEventServiceExtended.DEFAULT_EVENTS_COUNT);
+        new EventLoadOptions());
   }
 
   @Override
   public IEventService create(IConnectionManager connectionManager,
       IEventParser eventParser, IMetaService metaService,
-      @Assisted int eventLoadCount) {
+      EventLoadOptions eventLoadOptions) {
     InvocationEventCreator invocationEventCreator = invocationEventCreatorFactory
         .create(metaService);
     EventService eventService = new EventService(eventParser,
-        invocationEventCreator, eventLoadCount);
+        invocationEventCreator, eventLoadOptions);
 
     EventFileDAO eventFileDAO = eventFileDaoFactory.create(connectionManager,
         eventService);

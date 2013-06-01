@@ -303,7 +303,8 @@ public class EventTraceFigure extends Figure implements Observer {
     InvocationEventFigure lastThreadEventFigure = threadFigure
         .getLastEventThreadFigure();
     InvocationEventFigure eventFigure = eventFigureFactory.create(
-        invocationEvent, lastEventFigure, lastThreadEventFigure);
+        invocationEvent, lastEventFigure, lastThreadEventFigure,
+        connectionsLayer);
     threadFigure.addThreadEvent(eventFigure);
 
     lastEventFigure = eventFigure;

@@ -61,6 +61,89 @@ public class OtherCompleteTest extends TestHelper {
     Assert.assertEquals(index, convertedEvents.size());
   }
 
+  /*
+   * Case where the same method is nested and recursed
+   */
+  @Test
+  public void testRepeatedNestedLoop() {
+    ArrayList<IInvocationEvent> events = f.events(
+// @formatter:off
+        f.en(t1, m1),
+          f.en(t1, m2),
+            f.en(t1, m1),
+              f.en(t1, m2),
+              f.ex(t1, m2),
+            f.ex(t1, m1),
+            
+            f.en(t1, m1),
+              f.en(t1, m2),
+              f.ex(t1, m2),
+            f.ex(t1, m1),
+            
+            f.en(t1, m1),
+              f.en(t1, m2),
+              f.ex(t1, m2),
+            f.ex(t1, m1),
+          f.ex(t1, m2),
+        f.ex(t1, m1),
+        
+        f.en(t1, m1),
+          f.en(t1, m2),
+            f.en(t1, m1),
+              f.en(t1, m2),
+              f.ex(t1, m2),
+            f.ex(t1, m1),
+            
+            f.en(t1, m1),
+              f.en(t1, m2),
+              f.ex(t1, m2),
+            f.ex(t1, m1),
+            
+            f.en(t1, m1),
+              f.en(t1, m2),
+              f.ex(t1, m2),
+            f.ex(t1, m1),
+          f.ex(t1, m2),
+        f.ex(t1, m1)
+        // @formatter:on
+        );
+    LoopEventLoader eventLoader = new LoopEventLoader(8);
+    eventLoader.convertEvents(events, true);
+    List<IInvocationEvent> convertedEvents = eventLoader.getEvents();
+    Assert.assertEquals(1, convertedEvents.size());
+
+    IInvocationLoopEvent loopEvent = (IInvocationLoopEvent) convertedEvents
+        .get(0);
+    Assert.assertEquals(2, loopEvent.getLoopCount());
+
+    List<IInvocationEvent> loopEvents = loopEvent.getEvents();
+    Assert.assertEquals(5, loopEvents.size());
+
+    AbstractEventTest.assertEvent(InvocationEventType.MethodEntry, t1.getId(),
+        m1.getMetaId(), loopEvents.get(0));
+    AbstractEventTest.assertEvent(InvocationEventType.MethodEntry, t1.getId(),
+        m2.getMetaId(), loopEvents.get(1));
+    AbstractEventTest.assertEvent(InvocationEventType.MethodExit, t1.getId(),
+        m2.getMetaId(), loopEvents.get(3));
+    AbstractEventTest.assertEvent(InvocationEventType.MethodExit, t1.getId(),
+        m1.getMetaId(), loopEvents.get(4));
+
+    loopEvent = (IInvocationLoopEvent) loopEvents.get(2);
+    Assert.assertEquals(3, loopEvent.getLoopCount());
+
+    loopEvents = loopEvent.getEvents();
+    Assert.assertEquals(4, loopEvents.size());
+
+    AbstractEventTest.assertEvent(InvocationEventType.MethodEntry, t1.getId(),
+        m1.getMetaId(), loopEvents.get(0));
+    AbstractEventTest.assertEvent(InvocationEventType.MethodEntry, t1.getId(),
+        m2.getMetaId(), loopEvents.get(1));
+    AbstractEventTest.assertEvent(InvocationEventType.MethodExit, t1.getId(),
+        m2.getMetaId(), loopEvents.get(2));
+    AbstractEventTest.assertEvent(InvocationEventType.MethodExit, t1.getId(),
+        m1.getMetaId(), loopEvents.get(3));
+  }
+
   /**
    * Simulate a method call like
    * void m0() {
@@ -84,46 +167,46 @@ public class OtherCompleteTest extends TestHelper {
     ArrayList<IInvocationEvent> events = f.events(
         // @formatter:off
         f.en(t1, m0),
-        f.en(t1, m1),
-        f.en(t1, m2),
-        f.en(t1, m3),
-        f.ex(t1, m3),
-        f.en(t1, m3),
-        f.ex(t1, m3),
-        f.ex(t1, m2),
-        f.en(t1, m2),
-        f.en(t1, m3),
-        f.ex(t1, m3),
-        f.en(t1, m3),
-        f.ex(t1, m3),
-        f.ex(t1, m2),
-        f.en(t1, m2),
-        f.en(t1, m3),
-        f.ex(t1, m3),
-        f.en(t1, m3),
-        f.ex(t1, m3),
-        f.ex(t1, m2),
-        f.ex(t1, m1),
-        f.en(t1, m1),
-        f.en(t1, m2),
-        f.en(t1, m3),
-        f.ex(t1, m3),
-        f.en(t1, m3),
-        f.ex(t1, m3),
-        f.ex(t1, m2),
-        f.en(t1, m2),
-        f.en(t1, m3),
-        f.ex(t1, m3),
-        f.en(t1, m3),
-        f.ex(t1, m3),
-        f.ex(t1, m2),
-        f.en(t1, m2),
-        f.en(t1, m3),
-        f.ex(t1, m3),
-        f.en(t1, m3),
-        f.ex(t1, m3),
-        f.ex(t1, m2),
-        f.ex(t1, m1),
+          f.en(t1, m1),
+            f.en(t1, m2),
+              f.en(t1, m3),
+              f.ex(t1, m3),
+              f.en(t1, m3),
+              f.ex(t1, m3),
+            f.ex(t1, m2),
+            f.en(t1, m2),
+              f.en(t1, m3),
+              f.ex(t1, m3),
+              f.en(t1, m3),
+              f.ex(t1, m3),
+            f.ex(t1, m2),
+            f.en(t1, m2),
+              f.en(t1, m3),
+              f.ex(t1, m3),
+              f.en(t1, m3),
+              f.ex(t1, m3),
+            f.ex(t1, m2),
+          f.ex(t1, m1),
+          f.en(t1, m1),
+            f.en(t1, m2),
+              f.en(t1, m3),
+              f.ex(t1, m3),
+              f.en(t1, m3),
+              f.ex(t1, m3),
+            f.ex(t1, m2),
+            f.en(t1, m2),
+              f.en(t1, m3),
+              f.ex(t1, m3),
+              f.en(t1, m3),
+              f.ex(t1, m3),
+            f.ex(t1, m2),
+            f.en(t1, m2),
+              f.en(t1, m3),
+              f.ex(t1, m3),
+              f.en(t1, m3),
+              f.ex(t1, m3),
+            f.ex(t1, m2),
+          f.ex(t1, m1),
         f.ex(t1, m0)
         // @formatter:on
         );

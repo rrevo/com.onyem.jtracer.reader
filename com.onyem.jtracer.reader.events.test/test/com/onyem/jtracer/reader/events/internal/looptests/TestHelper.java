@@ -2,6 +2,7 @@ package com.onyem.jtracer.reader.events.internal.looptests;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.onyem.jtracer.reader.events.internal.Factory;
 import com.onyem.jtracer.reader.events.model.IInvocationThread;
 import com.onyem.jtracer.reader.meta.IMethod;
 
