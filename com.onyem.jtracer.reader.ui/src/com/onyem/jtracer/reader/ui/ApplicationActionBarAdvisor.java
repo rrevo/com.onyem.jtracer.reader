@@ -18,6 +18,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
   private OpenFileAction openAction;
   private IWorkbenchAction exitAction;
 
+  private IWorkbenchAction introAction;
   private OnlineHelpAction onlineHelpAction;
   private AboutAction aboutAction;
 
@@ -31,6 +32,8 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     exitAction = ActionFactory.QUIT.create(window);
     register(exitAction);
 
+    introAction = ActionFactory.INTRO.create(window);
+    register(introAction);
     onlineHelpAction = new OnlineHelpAction(window);
     register(onlineHelpAction);
     aboutAction = new AboutAction(window);
@@ -45,8 +48,8 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
     menuBar.add(fileMenu);
 
     MenuManager helpMenu = new MenuManager("&Help", null);
-    //    helpMenu.add(introAction);
-    //    helpMenu.add(new Separator());
+    helpMenu.add(introAction);
+    helpMenu.add(new Separator());
     helpMenu.add(onlineHelpAction);
     helpMenu.add(aboutAction);
     menuBar.add(helpMenu);

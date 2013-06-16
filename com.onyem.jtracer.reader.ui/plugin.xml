@@ -78,5 +78,16 @@
             sequence="M1+Q">
       </key>
    </extension>
+   <extension
+         point="org.eclipse.ui.intro">
+      <intro
+            class="com.onyem.jtracer.reader.ui.intro.WelcomeIntroPart"
+            id="com.onyem.jtracer.reader.ui.welcomeintro">
+      </intro>
+      <introProductBinding
+            introId="com.onyem.jtracer.reader.ui.welcomeintro"
+            productId="com.onyem.jtracer.reader.ui.product">
+      </introProductBinding>
+   </extension>
 
 </plugin>

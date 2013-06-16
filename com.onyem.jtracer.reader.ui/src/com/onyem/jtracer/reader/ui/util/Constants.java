@@ -6,9 +6,9 @@ public interface Constants {
   public final String META_FILE_NAME = "meta.out";
   public final String EVENT_FILE_NAME = "event.out";
 
-  //  public final String AGENT_FOLDER = "agent";
-  //  public final String SAMPLES_FOLDER = "samples";
-  //  public final String SAMPLES_LOGS_FOLDER = "logs";
+  public final String AGENT_FOLDER = "agent";
+  public final String SAMPLES_FOLDER = "samples";
+  public final String SAMPLES_LOGS_FOLDER = "logs";
 
   public final int METHOD_STEP = 10;
   public final int INDENT_STEP = 10;
