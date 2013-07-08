@@ -80,7 +80,8 @@ public class EventTraceFigure extends Figure implements Observer {
     eventService = trace.getEventService(eventFileName);
     this.queueService = queueService;
 
-    eventFigureFactory = new EventFigureFactory(trace.getClassTraceChecker());
+    eventFigureFactory = new EventFigureFactory(trace.getMetaService(),
+        trace.getClassTraceChecker());
     layoutCache = new LayoutCache();
 
     GridLayout gridLayout = new GridLayout();

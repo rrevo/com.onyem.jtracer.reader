@@ -24,6 +24,7 @@ import com.onyem.jtracer.reader.events.model.IMethodTraceInvocationEvent;
 import com.onyem.jtracer.reader.events.model.InvocationEventType;
 import com.onyem.jtracer.reader.events.model.internal.InvocationEventComparator;
 import com.onyem.jtracer.reader.events.model.internal.InvocationLoopEvent;
+import com.onyem.jtracer.reader.meta.IClass;
 import com.onyem.jtracer.reader.meta.IMetaService;
 import com.onyem.jtracer.reader.meta.IMethod;
 import com.onyem.jtracer.reader.meta.factory.IMetaServiceFactory;
@@ -128,8 +129,9 @@ public abstract class AbstractEventTest {
     }
   }
 
-  public static void assertTraceEvent(IInvocationEvent event,
-      InvocationEventType type, long threadId, String[] traceData) {
+  public static void assertTraceEvent(IMetaService metaService,
+      IInvocationEvent event, InvocationEventType type, long threadId,
+      String[] traceData) {
     IMethodTraceInvocationEvent traceEvent = (IMethodTraceInvocationEvent) event;
     Assert.assertEquals(type, traceEvent.getType());
     Assert.assertEquals(threadId, traceEvent.getThread().getId());
@@ -138,8 +140,10 @@ public abstract class AbstractEventTest {
 
     for (int i = 0; i < trace.size(); i++) {
       IMethod method = trace.get(i);
-      Assert.assertEquals("L" + traceData[i * 3] + ";", method.getIClass()
-          .getCanonicalName());
+      IClass clazz = metaService.getClassById(method.getIClass().getId());
+
+      Assert.assertEquals("L" + traceData[i * 3] + ";",
+          clazz.getCanonicalName());
       Assert.assertEquals(traceData[i * 3 + 1], method.getName());
       Assert.assertEquals(traceData[i * 3 + 2],
           method.getCanonicalDescription());

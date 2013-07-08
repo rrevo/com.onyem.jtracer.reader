@@ -12,13 +12,12 @@ class ExceptionCatchInvocationFigure extends MethodTraceInvocationFigure {
 
   private final IClassTraceChecker classTraceChecker;
 
-  ExceptionCatchInvocationFigure(IImageManager imageManager,
+  ExceptionCatchInvocationFigure(EventFigureServices services,
       IExceptionCatchInvocationEvent invocationEvent,
       InvocationEventFigure previousEventFigure,
       InvocationEventFigure previousThreadFigure,
       IClassTraceChecker classTraceChecker) {
-    super(imageManager, invocationEvent, previousEventFigure,
-        previousThreadFigure);
+    super(services, invocationEvent, previousEventFigure, previousThreadFigure);
 
     this.classTraceChecker = classTraceChecker;
 
@@ -29,17 +28,17 @@ class ExceptionCatchInvocationFigure extends MethodTraceInvocationFigure {
 
   @Override
   protected Image getImage() {
-    return imageManager.getImage(IImageManager.EXCEPTION_CATCH);
+    return services.imageManager.getImage(IImageManager.EXCEPTION_CATCH);
   }
 
   @Override
   public int getPreIndent() {
-    IClass clazz = getFirstMethod().getIClass();
+    IClass clazz = services.metaService.getMethodClass(getFirstMethod());
     if (classTraceChecker.isTraced(clazz)) {
       ExceptionThrowInvocationFigure throwFigure = (ExceptionThrowInvocationFigure) previousThreadFigure;
 
       int traceDifference = ClassTraceCheckerFactory.getTraceDifference(
-          classTraceChecker,
+          services.metaService, classTraceChecker,
           throwFigure.methodTraceInvocation.getMethodTrace(),
           methodTraceInvocation.getMethodTrace());
       return (traceDifference * -2);
@@ -49,7 +48,7 @@ class ExceptionCatchInvocationFigure extends MethodTraceInvocationFigure {
 
   @Override
   public int getPostIndent() {
-    IClass clazz = getFirstMethod().getIClass();
+    IClass clazz = services.metaService.getMethodClass(getFirstMethod());
     if (classTraceChecker.isTraced(clazz)) {
       return 1;
     }

@@ -7,8 +7,10 @@ import java.util.Set;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import com.onyem.jtracer.reader.db.ResultRowMapper;
+import com.onyem.jtracer.reader.meta.ClassId;
 import com.onyem.jtracer.reader.meta.ClassType;
 import com.onyem.jtracer.reader.meta.IClass;
+import com.onyem.jtracer.reader.meta.internal.ClassIdImpl;
 import com.onyem.jtracer.reader.meta.internal.ClassImpl;
 import com.onyem.jtracer.reader.meta.internal.ClassNameUtils;
 import com.onyem.jtracer.reader.meta.internal.IMetaServiceExtended;
@@ -19,7 +21,7 @@ class ClassResultRowMapper implements ResultRowMapper<IClass> {
   private final IMetaServiceExtended metaService;
   private final ClassNameUtils nameUtils;
 
-  private Set<IClass> interfaces = null;
+  private Set<ClassId> interfaces = null;
 
   ClassResultRowMapper(IMetaServiceExtended metaService,
       ClassNameUtils nameUtils) {
@@ -27,7 +29,7 @@ class ClassResultRowMapper implements ResultRowMapper<IClass> {
     this.nameUtils = nameUtils;
   }
 
-  public void setInterfaces(Set<IClass> interfaces) {
+  public void setInterfaces(Set<ClassId> interfaces) {
     this.interfaces = interfaces;
   }
 
@@ -52,9 +54,9 @@ class ClassResultRowMapper implements ResultRowMapper<IClass> {
     boolean isArray = rs.getBoolean("IS_ARRAY");
 
     Long superClassId = rs.getLong("SUPERCLASS_ID");
-    IClass superClazz = null;
+    ClassId superClazz = null;
     if (!rs.wasNull()) {
-      superClazz = metaService.getClassById(superClassId);
+      superClazz = new ClassIdImpl(superClassId);
     }
 
     Long componentId = rs.getLong("COMPONENT_ID");

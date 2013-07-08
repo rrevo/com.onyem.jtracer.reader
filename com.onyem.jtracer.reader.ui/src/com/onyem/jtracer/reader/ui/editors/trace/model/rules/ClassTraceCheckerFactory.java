@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.annotation.concurrent.Immutable;
 
+import com.onyem.jtracer.reader.meta.IMetaService;
 import com.onyem.jtracer.reader.meta.IMethod;
 
 @Immutable
@@ -15,14 +16,15 @@ public class ClassTraceCheckerFactory {
     return new ClassTraceChecker(rules);
   }
 
-  public static int getTraceDifference(IClassTraceChecker classTraceChecker,
-      List<IMethod> throwMethodStack, List<IMethod> catchMethodStack) {
+  public static int getTraceDifference(IMetaService metaService,
+      IClassTraceChecker classTraceChecker, List<IMethod> throwMethodStack,
+      List<IMethod> catchMethodStack) {
 
     int tracedClasssesCount = 0;
     for (int i = 0; i < throwMethodStack.size() - catchMethodStack.size(); i++) {
       IMethod invocationMethod = throwMethodStack.get(i);
-      if (classTraceChecker.isTraced(invocationMethod.getIClass()
-          .getCompleteName())) {
+      if (classTraceChecker.isTraced(metaService.getMethodClass(
+          invocationMethod).getCompleteName())) {
         tracedClasssesCount++;
       }
     }

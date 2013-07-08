@@ -21,7 +21,7 @@ import com.onyem.jtracer.reader.db.Transactional;
 import com.onyem.jtracer.reader.db.factory.IJdbcHelperFactory;
 import com.onyem.jtracer.reader.db.util.LongParameterSource;
 import com.onyem.jtracer.reader.db.util.LongResultRowMapper;
-import com.onyem.jtracer.reader.meta.IClass;
+import com.onyem.jtracer.reader.meta.ClassId;
 import com.onyem.jtracer.reader.meta.IMethod;
 import com.onyem.jtracer.reader.meta.internal.IMetaServiceExtended;
 
@@ -51,7 +51,7 @@ public class MethodDAO {
   }
 
   @Transactional
-  public IMethod getMethodByName(final IClass clazz, final String name,
+  public IMethod getMethodByName(final ClassId clazz, final String name,
       final String description) {
     ParameterSource parameterSource = new ParameterSource() {
 
@@ -98,10 +98,10 @@ public class MethodDAO {
         + " WHERE ";
   }
 
-  private List<IClass> getClasses(List<Long> classIds) {
-    List<IClass> classes = new ArrayList<IClass>();
+  private List<ClassId> getClasses(List<Long> classIds) {
+    List<ClassId> classes = new ArrayList<ClassId>();
     for (long classId : classIds) {
-      classes.add(metaService.getClassById(classId));
+      classes.add(metaService.getClassIdById(classId));
     }
     return classes;
   }
@@ -130,10 +130,10 @@ public class MethodDAO {
         }
         statement.setString(index++, method.getCanonicalDescription());
 
-        IClass clazz = method.getIClass();
+        ClassId clazz = method.getIClass();
         statement.setLong(index++, clazz.getId());
 
-        IClass returnType = method.getReturn();
+        ClassId returnType = method.getReturn();
         statement.setLong(index++, returnType.getId());
 
         String signature = method.getCanonicalSignature();
@@ -158,8 +158,8 @@ public class MethodDAO {
       }
     });
     if (method.getParameters() != null) {
-      List<IClass> parameters = method.getParameters();
-      for (final IClass parameterClazz : parameters) {
+      List<ClassId> parameters = method.getParameters();
+      for (final ClassId parameterClazz : parameters) {
         helper.update(new PreparedStatementCreator() {
 
           @Override
@@ -177,8 +177,8 @@ public class MethodDAO {
       }
     }
     if (method.getExceptions() != null) {
-      List<IClass> exceptions = method.getExceptions();
-      for (final IClass exceptionClazz : exceptions) {
+      List<ClassId> exceptions = method.getExceptions();
+      for (final ClassId exceptionClazz : exceptions) {
         helper.update(new PreparedStatementCreator() {
 
           @Override

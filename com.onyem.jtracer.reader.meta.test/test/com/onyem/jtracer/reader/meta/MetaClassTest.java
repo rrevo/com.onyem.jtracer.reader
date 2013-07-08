@@ -1,5 +1,6 @@
 package com.onyem.jtracer.reader.meta;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import junit.framework.Assert;
@@ -19,7 +20,7 @@ public class MetaClassTest extends AbstractMetaTest {
     final long metaId = 0l;
     IClass clazz = metaService.getClassByMetaId(metaId);
     {
-      Assert.assertTrue(clazz.getId() > 0);
+      Assert.assertTrue(clazz.getId().getId() > 0);
       Assert.assertEquals(metaId, clazz.getMetaId().longValue());
       Assert.assertEquals(33, clazz.getAccess().longValue());
       Assert.assertEquals(ClassType.CLASS, clazz.getClassType());
@@ -33,10 +34,16 @@ public class MetaClassTest extends AbstractMetaTest {
       Assert.assertEquals("Lorg/world/HelloWorld;", clazz.getCanonicalName());
     }
     {
-      IClass superClass = clazz.getSuperClass();
-      assertObject(superClass);
+      IClass superClass = metaService.getClassById(clazz.getSuperClass()
+          .getId());
+      assertClass(superClass);
     }
-    Set<IClass> interfaces = clazz.getInterfaces();
+    Set<ClassId> interfaceIds = clazz.getInterfaces();
+    Set<IClass> interfaces = new LinkedHashSet<IClass>();
+    for (ClassId classId : interfaceIds) {
+      interfaces.add(metaService.getClassById(classId.getId()));
+    }
+
     String[][] interfaceInfo = new String[][] {
         new String[] { "org.world.Marker", "org.world", "Marker", "Marker",
             "Lorg/world/Marker;" },
@@ -44,7 +51,7 @@ public class MetaClassTest extends AbstractMetaTest {
             "Lorg/world/Talker;" } };
     for (int i = 0; i < interfaceInfo.length; i++) {
       IClass anInterface = getInterface(interfaces, interfaceInfo[i][0]);
-      Assert.assertTrue(anInterface.getId() > 0);
+      Assert.assertTrue(anInterface.getId().getId() > 0);
       Assert.assertNull(anInterface.getMetaId());
       Assert.assertNull(anInterface.getAccess());
       Assert.assertEquals(ClassType.INTERFACE, anInterface.getClassType());
@@ -60,8 +67,8 @@ public class MetaClassTest extends AbstractMetaTest {
     }
   }
 
-  public static void assertObject(IClass objectClass) {
-    Assert.assertTrue(objectClass.getId() > 0);
+  public static void assertClass(IClass objectClass) {
+    Assert.assertTrue(objectClass.getId().getId() > 0);
     Assert.assertNull(objectClass.getMetaId());
     Assert.assertNull(objectClass.getAccess());
     Assert.assertEquals(ClassType.CLASS, objectClass.getClassType());
@@ -80,7 +87,7 @@ public class MetaClassTest extends AbstractMetaTest {
     final String canonicalName = "[Ljava/lang/Object;";
     IClass clazz = metaService.getClassByCanonicalName(canonicalName);
     {
-      Assert.assertTrue(clazz.getId() > 0);
+      Assert.assertTrue(clazz.getId().getId() > 0);
       Assert.assertNull(clazz.getMetaId());
       Assert.assertNull(clazz.getAccess());
       Assert.assertEquals(ClassType.ARRAY, clazz.getClassType());
@@ -94,8 +101,8 @@ public class MetaClassTest extends AbstractMetaTest {
     }
 
     {
-      IClass componentClazz = clazz.getComponentType();
-      assertObject(componentClazz);
+      ClassId componentClazz = clazz.getComponentType();
+      assertClass(metaService.getClassById(componentClazz.getId()));
     }
   }
 
@@ -104,7 +111,7 @@ public class MetaClassTest extends AbstractMetaTest {
     final String canonicalName = "[[Z";
     IClass clazz = metaService.getClassByCanonicalName(canonicalName);
     {
-      Assert.assertTrue(clazz.getId() > 0);
+      Assert.assertTrue(clazz.getId().getId() > 0);
       Assert.assertNull(clazz.getMetaId());
       Assert.assertNull(clazz.getAccess());
       Assert.assertEquals(ClassType.ARRAY, clazz.getClassType());
@@ -118,8 +125,9 @@ public class MetaClassTest extends AbstractMetaTest {
     }
 
     {
-      IClass componentClazz = clazz.getComponentType();
-      Assert.assertTrue(componentClazz.getId() > 0);
+      IClass componentClazz = metaService.getClassById(clazz.getComponentType()
+          .getId());
+      Assert.assertTrue(componentClazz.getId().getId() > 0);
       Assert.assertNull(componentClazz.getMetaId());
       Assert.assertNull(componentClazz.getAccess());
       Assert.assertEquals(ClassType.ARRAY, clazz.getClassType());
@@ -132,8 +140,10 @@ public class MetaClassTest extends AbstractMetaTest {
       Assert.assertEquals("[Z", componentClazz.getCanonicalName());
     }
     {
-      IClass componentClazz = clazz.getComponentType().getComponentType();
-      Assert.assertTrue(componentClazz.getId() > 0);
+      IClass componentClazz = metaService.getClassById(metaService
+          .getClassById(clazz.getComponentType().getId()).getComponentType()
+          .getId());
+      Assert.assertTrue(componentClazz.getId().getId() > 0);
       Assert.assertNull(componentClazz.getMetaId());
       Assert.assertNull(componentClazz.getAccess());
       Assert.assertEquals(ClassType.PRIMITIVE, componentClazz.getClassType());

@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 public interface IMethod {
 
-  long getId();
+  MethodId getId();
 
   @Nullable
   Long getMetaId();
@@ -29,13 +29,13 @@ public interface IMethod {
 
   String getName();
 
-  IClass getIClass();
+  ClassId getIClass();
 
-  List<IClass> getParameters();
+  List<ClassId> getParameters();
 
-  IClass getReturn();
+  ClassId getReturn();
 
-  List<IClass> getExceptions();
+  List<ClassId> getExceptions();
 
   String getCanonicalDescription();
 

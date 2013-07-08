@@ -6,34 +6,35 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
-import com.onyem.jtracer.reader.meta.IClass;
+import com.onyem.jtracer.reader.meta.ClassId;
 import com.onyem.jtracer.reader.meta.IMethod;
+import com.onyem.jtracer.reader.meta.MethodId;
 
 @Immutable
 public class MethodImpl implements IMethod {
 
   public static IMethod createMethod(long id, Long metaId, Integer access,
-      String name, IClass clazz, List<IClass> parameters, IClass returnType,
-      List<IClass> exceptions, String description, String signature) {
+      String name, ClassId clazz, List<ClassId> parameters, ClassId returnType,
+      List<ClassId> exceptions, String description, String signature) {
     return new MethodImpl(id, metaId, access, name, clazz, parameters,
         returnType, exceptions, description, signature);
   }
 
-  private final long id;
+  private final MethodId id;
   private final Long metaId;
   private final Integer access;
   private final String name;
-  private final IClass clazz;
-  private final List<IClass> parameters;
-  private final IClass returnType;
-  private final List<IClass> exceptions;
+  private final ClassId clazz;
+  private final List<ClassId> parameters;
+  private final ClassId returnType;
+  private final List<ClassId> exceptions;
   private final String description;
   private final String signature;
 
-  private MethodImpl(Long id, Long metaId, Integer access, String name,
-      IClass clazz, List<IClass> parameters, IClass returnType,
-      List<IClass> exceptions, String description, String signature) {
-    this.id = id;
+  private MethodImpl(long id, Long metaId, Integer access, String name,
+      ClassId clazz, List<ClassId> parameters, ClassId returnType,
+      List<ClassId> exceptions, String description, String signature) {
+    this.id = new MethodIdImpl(id);
     this.metaId = metaId;
     this.access = access;
     this.name = name;
@@ -48,7 +49,7 @@ public class MethodImpl implements IMethod {
   }
 
   @Override
-  public long getId() {
+  public MethodId getId() {
     return id;
   }
 
@@ -68,23 +69,23 @@ public class MethodImpl implements IMethod {
   }
 
   @Override
-  public IClass getIClass() {
+  public ClassId getIClass() {
     return clazz;
   }
 
   @Override
-  public List<IClass> getParameters() {
+  public List<ClassId> getParameters() {
     return parameters;
   }
 
   @Override
-  public IClass getReturn() {
+  public ClassId getReturn() {
     return returnType;
   }
 
   @Override
   @Nullable
-  public List<IClass> getExceptions() {
+  public List<ClassId> getExceptions() {
     return exceptions;
   }
 
@@ -108,7 +109,7 @@ public class MethodImpl implements IMethod {
         + ((description == null) ? 0 : description.hashCode());
     result = prime * result
         + ((exceptions == null) ? 0 : exceptions.hashCode());
-    result = prime * result + (int) (id ^ (id >>> 32));
+    result = prime * result + id.hashCode();
     result = prime * result + ((metaId == null) ? 0 : metaId.hashCode());
     result = prime * result + ((name == null) ? 0 : name.hashCode());
     result = prime * result
@@ -159,7 +160,7 @@ public class MethodImpl implements IMethod {
     } else if (!exceptions.equals(other.exceptions)) {
       return false;
     }
-    if (id != other.id) {
+    if (!id.equals(other.id)) {
       return false;
     }
     if (metaId == null) {

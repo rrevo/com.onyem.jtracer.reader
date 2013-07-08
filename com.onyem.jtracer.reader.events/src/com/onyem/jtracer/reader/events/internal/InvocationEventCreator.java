@@ -123,7 +123,7 @@ public class InvocationEventCreator {
     String methodSignature = parts[methodSignatureIndex];
 
     IMethod method = metaService.getMethodByNameDescription(methodName,
-        methodSignature, clazz);
+        methodSignature, clazz.getId());
     return method;
   }
 }

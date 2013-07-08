@@ -12,8 +12,10 @@ public interface IMetaService extends Closeable {
 
   IMethod getMethodById(long id);
 
+  IClass getMethodClass(IMethod method);
+
   IMethod getMethodByMetaId(long metaId);
 
   IMethod getMethodByNameDescription(String methodName, String methodSignature,
-      IClass clazz);
+      ClassId clazz);
 }

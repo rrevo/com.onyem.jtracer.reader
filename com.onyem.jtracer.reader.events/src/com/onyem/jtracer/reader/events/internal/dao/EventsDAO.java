@@ -153,7 +153,7 @@ public class EventsDAO {
       public void setParameters(PreparedStatement statement)
           throws SQLException {
         statement.setLong(1, id);
-        statement.setLong(2, event.getMethod().getId());
+        statement.setLong(2, event.getMethod().getId().getId());
       }
 
       @Override
@@ -199,7 +199,7 @@ public class EventsDAO {
         public void setParameters(PreparedStatement statement)
             throws SQLException {
           statement.setLong(1, id);
-          statement.setLong(2, methodTrace.getId());
+          statement.setLong(2, methodTrace.getId().getId());
         }
 
         @Override

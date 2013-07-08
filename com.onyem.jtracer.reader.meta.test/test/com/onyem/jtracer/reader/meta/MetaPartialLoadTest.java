@@ -14,17 +14,17 @@ public class MetaPartialLoadTest extends AbstractMetaTest {
   public void testPlainClassByNameInsertAndSearch() {
     // Insert the class
     IClass clazz = metaService.getPlainClassByName("org.world.NewClass");
-    long id = clazz.getId();
+    long id = clazz.getId().getId();
     assertNewClass(clazz);
 
     // Search for the class
     clazz = metaService.getPlainClassByName("org.world.NewClass");
-    Assert.assertEquals(id, clazz.getId());
+    Assert.assertEquals(id, clazz.getId().getId());
     assertNewClass(clazz);
   }
 
   private void assertNewClass(IClass clazz) {
-    Assert.assertTrue(clazz.getId() > 0);
+    Assert.assertTrue(clazz.getId().getId() > 0);
     Assert.assertNull(clazz.getMetaId());
     Assert.assertNull(clazz.getAccess());
     Assert.assertEquals(ClassType.CLASS, clazz.getClassType());
@@ -53,22 +53,22 @@ public class MetaPartialLoadTest extends AbstractMetaTest {
   public void testMethodByNameInsert() {
     IClass clazz = metaService.getPlainClassByName("AClass");
     IMethod method = metaService.getMethodByNameDescription("foo",
-        "(ILfoo.bar.Baz;)V", clazz);
+        "(ILfoo.bar.Baz;)V", clazz.getId());
 
-    Assert.assertTrue(method.getId() > 0);
+    Assert.assertTrue(method.getId().getId() > 0);
     Assert.assertNull(method.getMetaId());
-    Assert.assertEquals(clazz, method.getIClass());
+    Assert.assertEquals(clazz, getClass(method.getIClass()));
     Assert.assertNull(method.getAccess());
     Assert.assertEquals("foo", method.getName());
 
     Assert.assertEquals(2, method.getParameters().size());
-    Assert.assertEquals(metaService.getClassByCanonicalName("I"), method
-        .getParameters().get(0));
+    Assert.assertEquals(metaService.getClassByCanonicalName("I"),
+        getClass(method.getParameters().get(0)));
     Assert.assertEquals(metaService.getClassByCanonicalName("Lfoo.bar.Baz;"),
-        method.getParameters().get(1));
+        getClass(method.getParameters().get(1)));
 
     Assert.assertEquals(metaService.getClassByCanonicalName("V"),
-        method.getReturn());
+        getClass(method.getReturn()));
     Assert.assertTrue(method.getExceptions().isEmpty());
     Assert.assertEquals("(ILfoo.bar.Baz;)V", method.getCanonicalDescription());
     Assert.assertNull(method.getCanonicalSignature());

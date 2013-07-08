@@ -52,4 +52,8 @@ public abstract class AbstractMetaTest {
   public void teardown() throws IOException {
     metaService.close();
   }
+
+  protected IClass getClass(ClassId classId) {
+    return metaService.getClassById(classId.getId());
+  }
 }

@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 public interface IClass {
 
-  long getId();
+  ClassId getId();
 
   @Nullable
   Long getMetaId();
@@ -32,13 +32,13 @@ public interface IClass {
   String getClassName();
 
   @Nullable
-  IClass getSuperClass();
+  ClassId getSuperClass();
 
   @Nullable
-  Set<IClass> getInterfaces();
+  Set<ClassId> getInterfaces();
 
   @Nullable
-  IClass getComponentType();
+  ClassId getComponentType();
 
   @Nullable
   String getCanonicalSignature();

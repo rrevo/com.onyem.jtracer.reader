@@ -10,10 +10,12 @@ import javax.annotation.concurrent.Immutable;
 
 import com.google.inject.Inject;
 import com.onyem.jtracer.reader.db.util.Constants;
+import com.onyem.jtracer.reader.meta.ClassId;
 import com.onyem.jtracer.reader.meta.IClass;
 import com.onyem.jtracer.reader.meta.IMethod;
 import com.onyem.jtracer.reader.meta.internal.ClassFactory;
 import com.onyem.jtracer.reader.meta.internal.ClassNameUtils;
+import com.onyem.jtracer.reader.meta.internal.ClassUtils;
 import com.onyem.jtracer.reader.meta.internal.IMetaServiceExtended;
 import com.onyem.jtracer.reader.meta.internal.MetaService;
 import com.onyem.jtracer.reader.meta.internal.MethodImpl;
@@ -55,15 +57,15 @@ public class MetaParserHelper {
         superClass = metaService.getClassByCanonicalName(nameUtils
             .getCanonicalClassName(superClassName));
       }
-      Set<IClass> interfaces = new HashSet<IClass>();
+      Set<ClassId> interfaces = new HashSet<ClassId>();
       if (parts.length > 7) {
         String interfaceData = parts[7];
         String[] interfaceClassNames = interfaceData.split(",");
         for (String interfaceClassName : interfaceClassNames) {
           interfaceClassName = interfaceClassName.trim();
           if (interfaceClassName.length() > 0) {
-            interfaces.add(metaService.getInterfaceByCanonicalName(nameUtils
-                .getCanonicalClassName(interfaceClassName)));
+            interfaces.add(metaService.getInterfaceByCanonicalName(
+                nameUtils.getCanonicalClassName(interfaceClassName)).getId());
           }
         }
       }
@@ -73,7 +75,7 @@ public class MetaParserHelper {
       String packageName = nameUtils.getPackageFromCanonicalName(classNameRaw);
 
       IClass clazz = ClassFactory.createClassOrInterface(metaId, access,
-          classNameRaw, className, packageName, signature, superClass,
+          classNameRaw, className, packageName, signature, superClass.getId(),
           interfaces, nameUtils);
       return clazz;
     } else {
@@ -152,7 +154,8 @@ public class MetaParserHelper {
       }
 
       return MethodImpl.createMethod(Constants.NULL_ID, metaId, access, name,
-          clazz, parameters, returnType, exceptions, description, signature);
+          clazz.getId(), ClassUtils.getClassIds(parameters), returnType.getId(),
+          ClassUtils.getClassIds(exceptions), description, signature);
 
     } else {
       throw new RuntimeException();
@@ -213,9 +216,9 @@ public class MetaParserHelper {
   }
 
   public IMethod getMethodFromName(MetaService metaService, String name,
-      String description, IClass returnType, List<IClass> parameters,
-      IClass clazz) {
+      String description, ClassId returnType, List<ClassId> parameters,
+      ClassId clazz) {
     return MethodImpl.createMethod(Constants.NULL_ID, null, null, name, clazz,
-        parameters, returnType, new ArrayList<IClass>(), description, null);
+        parameters, returnType, new ArrayList<ClassId>(), description, null);
   }
 }

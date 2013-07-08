@@ -22,6 +22,7 @@ import com.onyem.jtracer.reader.db.Transactional;
 import com.onyem.jtracer.reader.db.factory.IJdbcHelperFactory;
 import com.onyem.jtracer.reader.db.util.LongParameterSource;
 import com.onyem.jtracer.reader.db.util.StringParameterSource;
+import com.onyem.jtracer.reader.meta.ClassId;
 import com.onyem.jtracer.reader.meta.ClassType;
 import com.onyem.jtracer.reader.meta.IClass;
 import com.onyem.jtracer.reader.meta.internal.ClassNameUtils;
@@ -56,6 +57,13 @@ public class ClassDAO {
     ParameterSource parameterSource = new LongParameterSource(id);
     String whereClause = "C.ID = ?";
     return getClassWithInterfaces(parameterSource, whereClause);
+  }
+
+  @Transactional
+  public ClassId getClassIdById(final long id) {
+    ParameterSource parameterSource = new LongParameterSource(id);
+    String whereClause = "C.ID = ?";
+    return getClassWithoutInterfaces(parameterSource, whereClause).getId();
   }
 
   @Transactional
@@ -99,19 +107,20 @@ public class ClassDAO {
 
   @Transactional
   public IClass getArrayByComponentType(final IClass componentType) {
-    ParameterSource parameterSource = new LongParameterSource(
-        componentType.getId());
+    ParameterSource parameterSource = new LongParameterSource(componentType
+        .getId().getId());
     String whereClause = "C.COMPONENT_ID = ? AND C.IS_ARRAY = 1";
     return getClassWithoutInterfaces(parameterSource, whereClause);
   }
 
   private IClass getClassWithInterfaces(ParameterSource parameterSource,
       String whereClause) {
+    List<ClassId> interfaces = helper.query(getInterfaceQuery() + whereClause,
+        parameterSource, new ClassIdResultRowMapper());
+    Set<ClassId> interfacesSet = toSet(interfaces);
+
     ClassResultRowMapper classResultRowMapper = new ClassResultRowMapper(
         metaService, nameUtils);
-    List<IClass> interfaces = helper.query(getInterfaceQuery() + whereClause,
-        parameterSource, classResultRowMapper);
-    Set<IClass> interfacesSet = toSet(interfaces);
     classResultRowMapper.setInterfaces(interfacesSet);
 
     IClass clazz = helper.queryForObject("SELECT * FROM CLASSES C WHERE "
@@ -121,7 +130,7 @@ public class ClassDAO {
   }
 
   private String getInterfaceQuery() {
-    return "SELECT I.* "
+    return "SELECT I.ID "
         + " FROM CLASSES I JOIN CLASS_INTERFACES CI ON I.ID = CI.INTERFACE_ID "
         + " JOIN CLASSES C ON CI.CLASS_ID = C.ID WHERE ";
   }
@@ -187,13 +196,13 @@ public class ClassDAO {
           statement.setString(index++, clazz.getCanonicalSignature());
         }
 
-        IClass superClass = clazz.getSuperClass();
+        ClassId superClass = clazz.getSuperClass();
         if (superClass == null) {
           statement.setNull(index++, Types.BIGINT);
         } else {
           statement.setLong(index++, superClass.getId());
         }
-        IClass componentType = clazz.getComponentType();
+        ClassId componentType = clazz.getComponentType();
         if (componentType == null) {
           statement.setNull(index++, Types.BIGINT);
         } else {
@@ -216,8 +225,8 @@ public class ClassDAO {
       }
     });
     if (clazz.getInterfaces() != null) {
-      Set<IClass> interfaces = clazz.getInterfaces();
-      for (final IClass interfaceClazz : interfaces) {
+      Set<ClassId> interfaces = clazz.getInterfaces();
+      for (final ClassId interfaceClazz : interfaces) {
         helper.update(new PreparedStatementCreator() {
 
           @Override

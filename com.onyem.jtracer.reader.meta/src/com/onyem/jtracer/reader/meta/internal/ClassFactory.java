@@ -3,6 +3,7 @@ package com.onyem.jtracer.reader.meta.internal;
 import java.util.Set;
 
 import com.onyem.jtracer.reader.db.util.Constants;
+import com.onyem.jtracer.reader.meta.ClassId;
 import com.onyem.jtracer.reader.meta.ClassType;
 import com.onyem.jtracer.reader.meta.IClass;
 
@@ -10,7 +11,7 @@ public class ClassFactory {
 
   public static IClass createClassOrInterface(Long metaId, Integer access,
       String canonicalName, String className, String packageName,
-      String signature, IClass superClass, Set<IClass> interfaces,
+      String signature, ClassId superClass, Set<ClassId> interfaces,
       ClassNameUtils nameUtils) {
 
     if (access != null) {

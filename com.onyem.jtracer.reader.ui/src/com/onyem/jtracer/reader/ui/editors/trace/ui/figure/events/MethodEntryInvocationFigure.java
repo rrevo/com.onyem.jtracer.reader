@@ -7,17 +7,16 @@ import com.onyem.jtracer.reader.ui.IImageManager;
 
 class MethodEntryInvocationFigure extends MethodInvocationFigure {
 
-  MethodEntryInvocationFigure(IImageManager imageManager,
+  MethodEntryInvocationFigure(EventFigureServices services,
       IMethodEntryInvocationEvent methodInvocation,
       InvocationEventFigure previousEventFigure,
       InvocationEventFigure previousThreadFigure) {
-    super(imageManager, methodInvocation, previousEventFigure,
-        previousThreadFigure);
+    super(services, methodInvocation, previousEventFigure, previousThreadFigure);
   }
 
   @Override
   protected Image getImage() {
-    return imageManager.getImage(IImageManager.METHOD_ENTRY);
+    return services.imageManager.getImage(IImageManager.METHOD_ENTRY);
   }
 
   @Override

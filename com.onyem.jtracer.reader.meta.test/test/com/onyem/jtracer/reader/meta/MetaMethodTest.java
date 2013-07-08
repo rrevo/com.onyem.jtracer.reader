@@ -13,22 +13,27 @@ public class MetaMethodTest extends AbstractMetaTest {
     return "/test-data/meta1.txt";
   }
 
+  long getClassMetaId(IMethod method) {
+    return metaService.getClassById(method.getIClass().getId()).getMetaId()
+        .longValue();
+  }
+
   //<im|1|0|1|<init>|()V|||>
   @Test
   public void testMethodByMetaId() {
     final long metaId = 1l;
     IMethod method = metaService.getMethodByMetaId(metaId);
-    long id = method.getId();
+    long id = method.getId().getId();
     Assert.assertTrue(id > 0);
     Assert.assertEquals(metaId, method.getMetaId().longValue());
-    Assert.assertEquals(0l, method.getIClass().getMetaId().longValue());
+    Assert.assertEquals(0l, getClassMetaId(method));
     Assert.assertEquals(1, method.getAccess().intValue());
     Assert.assertEquals("<init>", method.getName());
 
     Assert.assertTrue(method.getParameters().isEmpty());
     Assert.assertEquals(
         metaService.getClassByCanonicalName(TypeConstants.VOID),
-        method.getReturn());
+        getClass(method.getReturn()));
     Assert.assertTrue(method.getExceptions().isEmpty());
     Assert.assertEquals("()V", method.getCanonicalDescription());
     Assert.assertNull(method.getCanonicalSignature());
@@ -41,19 +46,19 @@ public class MetaMethodTest extends AbstractMetaTest {
   public void testMethodWithParam() {
     final long metaId = 2l;
     IMethod method = metaService.getMethodByMetaId(metaId);
-    Assert.assertTrue(method.getId() > 0);
+    Assert.assertTrue(method.getId().getId() > 0);
     Assert.assertEquals(metaId, method.getMetaId().longValue());
-    Assert.assertEquals(0l, method.getIClass().getMetaId().longValue());
+    Assert.assertEquals(0l, getClassMetaId(method));
     Assert.assertEquals(9, method.getAccess().intValue());
     Assert.assertEquals("main", method.getName());
 
     Assert.assertEquals(1, method.getParameters().size());
-    Assert.assertEquals(metaService
-        .getClassByCanonicalName("[Ljava/lang/String;"), method.getParameters()
-        .get(0));
+    Assert.assertEquals(
+        metaService.getClassByCanonicalName("[Ljava/lang/String;"),
+        getClass(method.getParameters().get(0)));
     Assert.assertEquals(
         metaService.getClassByCanonicalName(TypeConstants.VOID),
-        method.getReturn());
+        getClass(method.getReturn()));
     Assert.assertTrue(method.getExceptions().isEmpty());
     Assert.assertEquals("([Ljava/lang/String;)V",
         method.getCanonicalDescription());
@@ -65,24 +70,24 @@ public class MetaMethodTest extends AbstractMetaTest {
   public void testMethodWithMultipleParamAndReturn() {
     final long metaId = 11l;
     IMethod method = metaService.getMethodByMetaId(metaId);
-    Assert.assertTrue(method.getId() > 0);
+    Assert.assertTrue(method.getId().getId() > 0);
     Assert.assertEquals(metaId, method.getMetaId().longValue());
-    Assert.assertEquals(0l, method.getIClass().getMetaId().longValue());
+    Assert.assertEquals(0l, getClassMetaId(method));
     Assert.assertEquals(2, method.getAccess().intValue());
     Assert.assertEquals("aMethod", method.getName());
 
     Assert.assertEquals(3, method.getParameters().size());
-    Assert.assertEquals(metaService
-        .getClassByCanonicalName("Ljava/lang/Runnable;"), method
-        .getParameters().get(0));
-    Assert.assertEquals(metaService.getClassByCanonicalName("D"), method
-        .getParameters().get(1));
-    Assert.assertEquals(metaService.getClassByCanonicalName("J"), method
-        .getParameters().get(2));
+    Assert.assertEquals(
+        metaService.getClassByCanonicalName("Ljava/lang/Runnable;"),
+        getClass(method.getParameters().get(0)));
+    Assert.assertEquals(metaService.getClassByCanonicalName("D"),
+        getClass(method.getParameters().get(1)));
+    Assert.assertEquals(metaService.getClassByCanonicalName("J"),
+        getClass(method.getParameters().get(2)));
 
     Assert.assertEquals(
         metaService.getClassByCanonicalName("Ljava/lang/String;"),
-        method.getReturn());
+        getClass(method.getReturn()));
     Assert.assertTrue(method.getExceptions().isEmpty());
     Assert.assertEquals("(Ljava/lang/Runnable;DJ)Ljava/lang/String;",
         method.getCanonicalDescription());
@@ -94,20 +99,21 @@ public class MetaMethodTest extends AbstractMetaTest {
   public void testMethodWithExceptions() {
     final long metaId = 12l;
     IMethod method = metaService.getMethodByMetaId(metaId);
-    Assert.assertTrue(method.getId() > 0);
+    Assert.assertTrue(method.getId().getId() > 0);
     Assert.assertEquals(metaId, method.getMetaId().longValue());
-    Assert.assertEquals(0l, method.getIClass().getMetaId().longValue());
+    Assert.assertEquals(0l, getClassMetaId(method));
     Assert.assertEquals(1, method.getAccess().intValue());
     Assert.assertEquals("anotherMethod", method.getName());
 
     Assert.assertTrue(method.getParameters().isEmpty());
     Assert.assertEquals(metaService.getClassByCanonicalName("Z"),
-        method.getReturn());
+        getClass(method.getReturn()));
 
     Assert.assertEquals(2, method.getExceptions().size());
     {
-      IClass clazz = method.getExceptions().get(0);
-      Assert.assertTrue(clazz.getId() > 0);
+      IClass clazz = metaService.getClassById(method.getExceptions().get(0)
+          .getId());
+      Assert.assertTrue(clazz.getId().getId() > 0);
       Assert.assertNull(clazz.getMetaId());
       Assert.assertNull(clazz.getAccess());
       Assert.assertEquals(ClassType.CLASS, clazz.getClassType());
@@ -115,8 +121,9 @@ public class MetaMethodTest extends AbstractMetaTest {
           clazz.getCompleteName());
     }
     {
-      IClass clazz = method.getExceptions().get(1);
-      Assert.assertTrue(clazz.getId() > 0);
+      IClass clazz = metaService.getClassById(method.getExceptions().get(1)
+          .getId());
+      Assert.assertTrue(clazz.getId().getId() > 0);
       Assert.assertNull(clazz.getMetaId());
       Assert.assertNull(clazz.getAccess());
       Assert.assertEquals(ClassType.CLASS, clazz.getClassType());

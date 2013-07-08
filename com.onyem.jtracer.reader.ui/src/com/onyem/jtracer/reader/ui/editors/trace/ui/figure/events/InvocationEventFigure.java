@@ -5,11 +5,10 @@ import org.eclipse.draw2d.IFigure;
 
 import com.onyem.jtracer.reader.events.model.IInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IInvocationThread;
-import com.onyem.jtracer.reader.ui.IImageManager;
 
 public abstract class InvocationEventFigure extends Figure {
 
-  protected final IImageManager imageManager;
+  protected final EventFigureServices services;
 
   protected final IInvocationThread thread;
   protected final IInvocationEvent event;
@@ -20,10 +19,10 @@ public abstract class InvocationEventFigure extends Figure {
   protected InvocationEventFigure previousThreadFigure;
   protected InvocationEventFigure nextThreadFigure;
 
-  InvocationEventFigure(IImageManager imageManager, IInvocationEvent event,
+  InvocationEventFigure(EventFigureServices services, IInvocationEvent event,
       InvocationEventFigure previousEventFigure,
       InvocationEventFigure previousThreadFigure) {
-    this.imageManager = imageManager;
+    this.services = services;
     this.event = event;
     this.thread = event.getThread();
 

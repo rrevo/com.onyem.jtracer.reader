@@ -8,7 +8,7 @@ import java.util.List;
 import javax.annotation.concurrent.NotThreadSafe;
 
 import com.onyem.jtracer.reader.db.ResultRowMapper;
-import com.onyem.jtracer.reader.meta.IClass;
+import com.onyem.jtracer.reader.meta.ClassId;
 import com.onyem.jtracer.reader.meta.IMethod;
 import com.onyem.jtracer.reader.meta.internal.IMetaServiceExtended;
 import com.onyem.jtracer.reader.meta.internal.MethodImpl;
@@ -17,18 +17,18 @@ import com.onyem.jtracer.reader.meta.internal.MethodImpl;
 class MethodResultRowMapper implements ResultRowMapper<IMethod> {
 
   private final IMetaServiceExtended metaService;
-  private List<IClass> parameters = new ArrayList<IClass>();
-  private List<IClass> exceptions = new ArrayList<IClass>();
+  private List<ClassId> parameters = new ArrayList<ClassId>();
+  private List<ClassId> exceptions = new ArrayList<ClassId>();
 
   MethodResultRowMapper(IMetaServiceExtended metaService) {
     this.metaService = metaService;
   }
 
-  public void setParameters(List<IClass> parameters) {
+  public void setParameters(List<ClassId> parameters) {
     this.parameters = parameters;
   }
 
-  public void setExceptions(List<IClass> exceptions) {
+  public void setExceptions(List<ClassId> exceptions) {
     this.exceptions = exceptions;
   }
 
@@ -46,10 +46,10 @@ class MethodResultRowMapper implements ResultRowMapper<IMethod> {
     String name = rs.getString("NAME");
 
     long classId = rs.getLong("CLASS_ID");
-    IClass clazz = metaService.getClassById(classId);
+    ClassId clazz = metaService.getClassIdById(classId);
 
     long returnTypeId = rs.getLong("RETURN_ID");
-    IClass returnType = metaService.getClassById(returnTypeId);
+    ClassId returnType = metaService.getClassIdById(returnTypeId);
 
     String description = rs.getString("DESCRIPTION");
     String signature = rs.getString("SIGNATURE");

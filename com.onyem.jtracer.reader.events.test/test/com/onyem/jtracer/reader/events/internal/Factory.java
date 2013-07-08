@@ -15,6 +15,7 @@ import com.onyem.jtracer.reader.events.model.internal.InvocationThread;
 import com.onyem.jtracer.reader.events.model.internal.MethodEntryInvocationEvent;
 import com.onyem.jtracer.reader.events.model.internal.MethodExitInvocationEvent;
 import com.onyem.jtracer.reader.meta.IMethod;
+import com.onyem.jtracer.reader.meta.MethodId;
 
 public class Factory {
 
@@ -48,8 +49,11 @@ public class Factory {
   }
 
   public IMethod method(long methodId, long metaId) {
+    MethodId mId = mock(MethodId.class);
+    when(mId.getId()).thenReturn(methodId);
+
     IMethod method = mock(IMethod.class);
-    when(method.getId()).thenReturn(methodId);
+    when(method.getId()).thenReturn(mId);
     when(method.getMetaId()).thenReturn(Long.valueOf(metaId));
     return method;
   }

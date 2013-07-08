@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 
+import com.onyem.jtracer.reader.meta.ClassId;
 import com.onyem.jtracer.reader.meta.ClassType;
 import com.onyem.jtracer.reader.meta.IClass;
 
@@ -14,35 +15,47 @@ public class ClassImpl implements IClass {
 
   public static IClass create(long id, Long metaId, Integer access,
       String className, String packageName, ClassType classType,
-      IClass superClazz, Set<IClass> interfaces, IClass componentClazz,
+      ClassId superClazz, Set<ClassId> interfaces, IClass componentClazz,
       String signature, String canonicalName) {
     return new ClassImpl(id, metaId, access, classType, className, packageName,
         superClazz, interfaces, componentClazz, signature, canonicalName);
   }
 
-  private final long id;
+  private final ClassId id;
   private final Long metaId;
   private final Integer access;
   private final ClassType classType;
   private final String className;
   private final String packageName;
-  private final IClass superClass;
-  private final Set<IClass> interfaces;
-  private final IClass componentType;
+  private final ClassId superClass;
+  private final Set<ClassId> interfaces;
+  private final ClassId componentType;
   private final String signature;
   private final String canonicalName;
 
-  private ClassImpl(Long id, Long metaId, Integer access, ClassType classType,
-      String className, String packageName, IClass superClass,
-      Set<IClass> interfaces, IClass componentType, String signature,
+  private final transient String arraySimpleName;
+  private final transient String arrayCompleteName;
+
+  private ClassImpl(long id, Long metaId, Integer access, ClassType classType,
+      String className, String packageName, ClassId superClass,
+      Set<ClassId> interfaces, IClass componentClazz, String signature,
       String canonicalName) {
-    this.id = id;
+    this.id = new ClassIdImpl(id);
     this.metaId = metaId;
     this.access = access;
     this.classType = classType;
     this.className = className;
     this.packageName = packageName;
-    this.componentType = componentType;
+
+    if (componentClazz == null) {
+      this.componentType = null;
+      arraySimpleName = null;
+      arrayCompleteName = null;
+    } else {
+      this.componentType = componentClazz.getId();
+      arraySimpleName = componentClazz.getSimpleName() + "[]";
+      arrayCompleteName = componentClazz.getCompleteName() + "[]";
+    }
     this.superClass = superClass;
     this.interfaces = initializeInterfaces(interfaces);
 
@@ -113,7 +126,7 @@ public class ClassImpl implements IClass {
     assert getCanonicalName() != null && !getCanonicalName().isEmpty();
   }
 
-  private Set<IClass> initializeInterfaces(Set<IClass> interfaces) {
+  private Set<ClassId> initializeInterfaces(Set<ClassId> interfaces) {
     if (interfaces == null) {
       interfaces = Collections.emptySet();
     }
@@ -121,7 +134,7 @@ public class ClassImpl implements IClass {
   }
 
   @Override
-  public long getId() {
+  public ClassId getId() {
     return id;
   }
 
@@ -163,13 +176,13 @@ public class ClassImpl implements IClass {
 
   @Override
   @Nullable
-  public IClass getSuperClass() {
+  public ClassId getSuperClass() {
     return superClass;
   }
 
   @Override
   @Nullable
-  public Set<IClass> getInterfaces() {
+  public Set<ClassId> getInterfaces() {
     switch (classType) {
     case CLASS:
     case INTERFACE:
@@ -184,7 +197,7 @@ public class ClassImpl implements IClass {
 
   @Override
   @Nullable
-  public IClass getComponentType() {
+  public ClassId getComponentType() {
     return componentType;
   }
 
@@ -197,7 +210,7 @@ public class ClassImpl implements IClass {
     case VOID:
       return className;
     case ARRAY:
-      return componentType.getSimpleName() + "[]";
+      return arraySimpleName;
     }
     throw new IllegalStateException();
   }
@@ -215,7 +228,7 @@ public class ClassImpl implements IClass {
     case VOID:
       return className;
     case ARRAY:
-      return componentType.getCompleteName() + "[]";
+      return arrayCompleteName;
     }
     throw new IllegalStateException();
   }
@@ -242,7 +255,7 @@ public class ClassImpl implements IClass {
     result = prime * result + ((classType == null) ? 0 : classType.hashCode());
     result = prime * result
         + ((componentType == null) ? 0 : componentType.hashCode());
-    result = prime * result + (int) (id ^ (id >>> 32));
+    result = prime * result + id.hashCode();
     result = prime * result
         + ((interfaces == null) ? 0 : interfaces.hashCode());
     result = prime * result + ((metaId == null) ? 0 : metaId.hashCode());
@@ -297,7 +310,7 @@ public class ClassImpl implements IClass {
     } else if (!componentType.equals(other.componentType)) {
       return false;
     }
-    if (id != other.id) {
+    if (!id.equals(other.id)) {
       return false;
     }
     if (interfaces == null) {

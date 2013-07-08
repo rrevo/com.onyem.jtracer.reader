@@ -23,7 +23,7 @@ public class PrimitiveTest extends AbstractMetaTest implements TypeConstants {
     for (int i = 0; i < primitiveNames.length; i++) {
       IClass primitive = metaService
           .getClassByCanonicalName(primitiveCanonicalNames[i]);
-      Assert.assertTrue(primitive.getId() > 0);
+      Assert.assertTrue(primitive.getId().getId() > 0);
       Assert.assertEquals(primitiveNames[i], primitive.getSimpleName());
       Assert.assertEquals(primitiveNames[i], primitive.getCompleteName());
       Assert.assertEquals(primitiveCanonicalNames[i],
@@ -45,7 +45,7 @@ public class PrimitiveTest extends AbstractMetaTest implements TypeConstants {
     String canonicalName = TypeConstants.VOID;
     String name = TypeConstants.VOID_NAME;
     IClass primitive = metaService.getClassByCanonicalName(canonicalName);
-    Assert.assertTrue(primitive.getId() > 0);
+    Assert.assertTrue(primitive.getId().getId() > 0);
     Assert.assertEquals(name, primitive.getSimpleName());
     Assert.assertEquals(name, primitive.getCompleteName());
     Assert.assertEquals(canonicalName, primitive.getCanonicalName());

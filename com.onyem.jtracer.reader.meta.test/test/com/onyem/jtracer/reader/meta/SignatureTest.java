@@ -18,15 +18,15 @@ public class SignatureTest extends AbstractMetaTest {
     final long methodMetaId = 2l;
     IMethod method = metaService.getMethodByMetaId(methodMetaId);
     {
-      Assert.assertTrue(method.getId() > 0);
+      Assert.assertTrue(method.getId().getId() > 0);
       Assert.assertEquals(methodMetaId, method.getMetaId().longValue());
       Assert.assertEquals(1, method.getAccess().intValue());
       Assert.assertEquals("aMethod", method.getName());
 
       Assert.assertEquals(2, method.getParameters().size());
-      MetaClassTest.assertObject(method.getParameters().get(0));
-      MetaClassTest.assertObject(method.getParameters().get(1));
-      MetaClassTest.assertObject(method.getReturn());
+      MetaClassTest.assertClass(getClass(method.getParameters().get(0)));
+      MetaClassTest.assertClass(getClass(method.getParameters().get(1)));
+      MetaClassTest.assertClass(getClass(method.getReturn()));
       Assert.assertTrue(method.getExceptions().isEmpty());
       Assert.assertEquals(
           "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
@@ -35,7 +35,7 @@ public class SignatureTest extends AbstractMetaTest {
           method.getCanonicalSignature());
     }
     {
-      IClass clazz = method.getIClass();
+      IClass clazz = getClass(method.getIClass());
       Assert.assertEquals("<P:Ljava/lang/Object;>Ljava/lang/Object;",
           clazz.getCanonicalSignature());
     }

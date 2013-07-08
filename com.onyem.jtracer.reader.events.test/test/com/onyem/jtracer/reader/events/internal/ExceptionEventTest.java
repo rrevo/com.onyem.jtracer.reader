@@ -28,9 +28,9 @@ public class ExceptionEventTest extends AbstractEventTest {
     assertEvent(InvocationEventType.MethodEntry, 1, 18, events.get(index++));
     assertEvent(InvocationEventType.MethodThrowExit, 1, 18, events.get(index++));
 
-    assertTraceEvent(events.get(index++), InvocationEventType.ExceptionThrow,
-        1, new String[] { "org/world/Util", "level5",
-            "(ILjava/lang/Runnable;)V", "org/world/Util", "level4",
+    assertTraceEvent(metaService, events.get(index++),
+        InvocationEventType.ExceptionThrow, 1, new String[] { "org/world/Util",
+            "level5", "(ILjava/lang/Runnable;)V", "org/world/Util", "level4",
             "(ILjava/lang/Runnable;)V", "org/world/Util", "level3",
             "(ILjava/lang/Runnable;)V", "org/world/Util", "level2",
             "(ILjava/lang/Runnable;)V", "org/world/Util", "level1",
@@ -40,8 +40,9 @@ public class ExceptionEventTest extends AbstractEventTest {
             "org/world/HelloWorldException", "run", "()V",
             "org/world/HelloWorldException", "main", "([Ljava/lang/String;)V" });
 
-    assertTraceEvent(events.get(index++), InvocationEventType.ExceptionCatch,
-        1, new String[] { "org/world/HelloWorldException", "run", "()V",
+    assertTraceEvent(metaService, events.get(index++),
+        InvocationEventType.ExceptionCatch, 1, new String[] {
+            "org/world/HelloWorldException", "run", "()V",
             "org/world/HelloWorldException", "main", "([Ljava/lang/String;)V" });
 
     assertEvent(InvocationEventType.MethodEntry, 1, 5, events.get(index++));
@@ -53,16 +54,17 @@ public class ExceptionEventTest extends AbstractEventTest {
     assertEvent(InvocationEventType.MethodThrowExit, 10, 18,
         events.get(index++));
 
-    assertTraceEvent(events.get(index++), InvocationEventType.ExceptionThrow,
-        10, new String[] { "org/world/Util", "level5",
-            "(ILjava/lang/Runnable;)V", "org/world/Util", "level4",
-            "(ILjava/lang/Runnable;)V", "org/world/Util", "level3",
-            "(ILjava/lang/Runnable;)V", "org/world/Util", "level2",
-            "(ILjava/lang/Runnable;)V", "org/world/Util", "level1",
-            "(ILjava/lang/Runnable;)V", "org/world/Util", "level0",
-            "(ILjava/lang/Runnable;)V", "org/world/HelloWorldException",
-            "sayIterHello", "(Ljava/lang/String;I)V",
-            "org/world/HelloWorldException", "access$000",
+    assertTraceEvent(metaService, events.get(index++),
+        InvocationEventType.ExceptionThrow, 10, new String[] {
+            "org/world/Util", "level5", "(ILjava/lang/Runnable;)V",
+            "org/world/Util", "level4", "(ILjava/lang/Runnable;)V",
+            "org/world/Util", "level3", "(ILjava/lang/Runnable;)V",
+            "org/world/Util", "level2", "(ILjava/lang/Runnable;)V",
+            "org/world/Util", "level1", "(ILjava/lang/Runnable;)V",
+            "org/world/Util", "level0", "(ILjava/lang/Runnable;)V",
+            "org/world/HelloWorldException", "sayIterHello",
+            "(Ljava/lang/String;I)V", "org/world/HelloWorldException",
+            "access$000",
             "(Lorg/world/HelloWorldException;Ljava/lang/String;I)V",
             "org/world/HelloWorldException$1", "run", "()V" });
   }

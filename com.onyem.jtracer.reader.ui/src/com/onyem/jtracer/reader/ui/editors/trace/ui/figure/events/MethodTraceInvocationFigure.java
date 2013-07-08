@@ -9,7 +9,6 @@ import org.eclipse.swt.graphics.Image;
 import com.onyem.jtracer.reader.events.model.IMethodTraceInvocationEvent;
 import com.onyem.jtracer.reader.meta.IClass;
 import com.onyem.jtracer.reader.meta.IMethod;
-import com.onyem.jtracer.reader.ui.IImageManager;
 
 abstract class MethodTraceInvocationFigure extends InvocationEventFigure {
 
@@ -17,11 +16,11 @@ abstract class MethodTraceInvocationFigure extends InvocationEventFigure {
   private final IFigure imageFigure;
   private final IFigure normalFigure;
 
-  MethodTraceInvocationFigure(IImageManager imageManager,
+  MethodTraceInvocationFigure(EventFigureServices services,
       IMethodTraceInvocationEvent methodTraceInvocation,
       InvocationEventFigure previousEventFigure,
       InvocationEventFigure previousThreadFigure) {
-    super(imageManager, methodTraceInvocation, previousEventFigure,
+    super(services, methodTraceInvocation, previousEventFigure,
         previousThreadFigure);
 
     this.methodTraceInvocation = methodTraceInvocation;
@@ -53,7 +52,7 @@ abstract class MethodTraceInvocationFigure extends InvocationEventFigure {
   private IFigure makeNormalFigure() {
     IMethod invocationMethod = getFirstMethod();
     String methodName = invocationMethod.getName();
-    IClass clazz = invocationMethod.getIClass();
+    IClass clazz = services.metaService.getMethodClass(invocationMethod);
     IFigure figure = new Label(clazz.getClassName() + " " + methodName);
     figure.setOpaque(true);
     return figure;

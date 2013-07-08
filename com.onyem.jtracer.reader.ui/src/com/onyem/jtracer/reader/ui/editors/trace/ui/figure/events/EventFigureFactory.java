@@ -12,17 +12,18 @@ import com.onyem.jtracer.reader.events.model.IInvocationLoopEvent;
 import com.onyem.jtracer.reader.events.model.IMethodEntryInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IMethodExitInvocationEvent;
 import com.onyem.jtracer.reader.events.model.IMethodExitThrowInvocationEvent;
+import com.onyem.jtracer.reader.meta.IMetaService;
 import com.onyem.jtracer.reader.ui.Activator;
-import com.onyem.jtracer.reader.ui.IImageManager;
 import com.onyem.jtracer.reader.ui.editors.trace.model.rules.IClassTraceChecker;
 
 public class EventFigureFactory {
 
-  private final IImageManager imageManager;
+  private final EventFigureServices services;
   private final IClassTraceChecker classTraceChecker;
 
-  public EventFigureFactory(IClassTraceChecker classTraceChecker) {
-    imageManager = Activator.getImageManager();
+  public EventFigureFactory(IMetaService metaService,
+      IClassTraceChecker classTraceChecker) {
+    services = new EventFigureServices(Activator.getImageManager(), metaService);
     this.classTraceChecker = classTraceChecker;
   }
 
@@ -32,27 +33,27 @@ public class EventFigureFactory {
       ConnectionLayer connectionsLayer) {
     switch (invocationEvent.getType()) {
     case MethodEntry:
-      return new MethodEntryInvocationFigure(imageManager,
+      return new MethodEntryInvocationFigure(services,
           (IMethodEntryInvocationEvent) invocationEvent, previousEventFigure,
           previousThreadFigure);
 
     case MethodExit:
-      return new MethodExitInvocationFigure(imageManager,
+      return new MethodExitInvocationFigure(services,
           (IMethodExitInvocationEvent) invocationEvent, previousEventFigure,
           previousThreadFigure);
 
     case MethodThrowExit:
-      return new MethodExitThrowInvocationFigure(imageManager,
+      return new MethodExitThrowInvocationFigure(services,
           (IMethodExitThrowInvocationEvent) invocationEvent,
           previousEventFigure, previousThreadFigure);
 
     case ExceptionThrow:
-      return new ExceptionThrowInvocationFigure(imageManager,
+      return new ExceptionThrowInvocationFigure(services,
           (IExceptionThrowInvocationEvent) invocationEvent,
           previousEventFigure, previousThreadFigure);
 
     case ExceptionCatch:
-      return new ExceptionCatchInvocationFigure(imageManager,
+      return new ExceptionCatchInvocationFigure(services,
           (IExceptionCatchInvocationEvent) invocationEvent,
           previousEventFigure, previousThreadFigure, classTraceChecker);
 
@@ -60,7 +61,7 @@ public class EventFigureFactory {
       IInvocationLoopEvent loopEvent = (IInvocationLoopEvent) invocationEvent;
       List<InvocationEventFigure> loopFigures = createLoopEventFigures(
           loopEvent, connectionsLayer);
-      return new LoopInvocationFigure(imageManager, loopEvent, loopFigures,
+      return new LoopInvocationFigure(services, loopEvent, loopFigures,
           previousEventFigure, previousThreadFigure, connectionsLayer);
 
     default:

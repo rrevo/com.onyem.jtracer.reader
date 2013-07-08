@@ -7,6 +7,7 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import com.google.inject.assistedinject.Assisted;
 import com.onyem.jtracer.reader.annotations.Service;
+import com.onyem.jtracer.reader.meta.ClassId;
 import com.onyem.jtracer.reader.meta.IClass;
 import com.onyem.jtracer.reader.meta.IMethod;
 import com.onyem.jtracer.reader.meta.internal.dao.ClassDAO;
@@ -49,6 +50,11 @@ public class MetaService implements IMetaServiceExtended {
   public synchronized IClass getClassById(long id) {
     IClass clazz = classDAO.getClassById(id);
     return clazz;
+  }
+
+  @Override
+  public synchronized ClassId getClassIdById(long id) {
+    return classDAO.getClassIdById(id);
   }
 
   @Override
@@ -140,6 +146,12 @@ public class MetaService implements IMetaServiceExtended {
     return method;
   }
 
+  @Override
+  public synchronized IClass getMethodClass(IMethod method) {
+    ClassId classId = method.getIClass();
+    return getClassById(classId.getId());
+  }
+
   /*
    * For traced classes, the exception throw will be followed only after method
    * entry events. So the traced classes should be found in the db
@@ -147,7 +159,7 @@ public class MetaService implements IMetaServiceExtended {
    */
   @Override
   public synchronized IMethod getMethodByNameDescription(String name,
-      String description, IClass clazz) {
+      String description, ClassId clazz) {
     // Validate the description and insert the classes if necessary
     IClass returnType = metaParserHelper.getReturnType(this, description);
     List<IClass> parameters = metaParserHelper.getParameters(this, description);
@@ -156,7 +168,8 @@ public class MetaService implements IMetaServiceExtended {
       return method;
     } else {
       IMethod methodFromName = metaParserHelper.getMethodFromName(this, name,
-          description, returnType, parameters, clazz);
+          description, returnType.getId(), ClassUtils.getClassIds(parameters),
+          clazz);
       return methodDAO.insertMethod(methodFromName);
     }
   }

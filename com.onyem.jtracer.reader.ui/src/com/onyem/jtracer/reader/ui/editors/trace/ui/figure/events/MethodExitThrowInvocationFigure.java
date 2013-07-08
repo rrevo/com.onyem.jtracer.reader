@@ -7,17 +7,16 @@ import com.onyem.jtracer.reader.ui.IImageManager;
 
 class MethodExitThrowInvocationFigure extends MethodInvocationFigure {
 
-  MethodExitThrowInvocationFigure(IImageManager imageManager,
+  MethodExitThrowInvocationFigure(EventFigureServices services,
       IMethodExitThrowInvocationEvent methodInvocation,
       InvocationEventFigure previousEventFigure,
       InvocationEventFigure previousThreadFigure) {
-    super(imageManager, methodInvocation, previousEventFigure,
-        previousThreadFigure);
+    super(services, methodInvocation, previousEventFigure, previousThreadFigure);
   }
 
   @Override
   protected Image getImage() {
-    return imageManager.getImage(IImageManager.EXCEPTION_THROW);
+    return services.imageManager.getImage(IImageManager.EXCEPTION_THROW);
   }
 
   @Override

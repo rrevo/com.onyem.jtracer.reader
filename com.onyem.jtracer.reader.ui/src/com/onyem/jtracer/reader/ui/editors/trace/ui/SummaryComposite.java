@@ -215,7 +215,7 @@ public class SummaryComposite extends Composite {
 
           final IMethod method = trace.getMetaService().getMethodByMetaId(
               rowDataHolder.methodIndex);
-          final IClass clazz = method.getIClass();
+          final IClass clazz = trace.getMetaService().getMethodClass(method);
 
           Display.getDefault().asyncExec(new Runnable() {
 

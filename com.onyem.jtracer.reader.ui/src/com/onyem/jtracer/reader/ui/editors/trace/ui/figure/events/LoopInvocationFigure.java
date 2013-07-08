@@ -16,7 +16,6 @@ import org.eclipse.draw2d.RectangleFigure;
 import org.eclipse.draw2d.geometry.Rectangle;
 
 import com.onyem.jtracer.reader.events.model.IInvocationLoopEvent;
-import com.onyem.jtracer.reader.ui.IImageManager;
 import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.connector.BottomLeftBoundsAnchor;
 import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.connector.TopLeftBoundsAnchor;
 import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.layout.LayoutCache;
@@ -28,12 +27,12 @@ class LoopInvocationFigure extends InvocationEventFigure {
   private final InvocationEventFigure firstLoopEventFigure;
   private final InvocationEventFigure lastLoopEventFigure;
 
-  LoopInvocationFigure(IImageManager imageManager,
+  LoopInvocationFigure(EventFigureServices services,
       IInvocationLoopEvent loopEvent, List<InvocationEventFigure> loopFigures,
       InvocationEventFigure previousEventFigure,
       InvocationEventFigure previousThreadFigure,
       ConnectionLayer connectionsLayer) {
-    super(imageManager, loopEvent, previousEventFigure, previousThreadFigure);
+    super(services, loopEvent, previousEventFigure, previousThreadFigure);
 
     GridLayout gridLayout = makeGridLayout();
     gridLayout.numColumns = 2;
