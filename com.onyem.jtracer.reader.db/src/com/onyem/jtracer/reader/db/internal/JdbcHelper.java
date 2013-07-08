@@ -24,6 +24,7 @@ import com.onyem.jtracer.reader.db.TransactionalAware;
 @Immutable
 public class JdbcHelper implements IJdbcHelper {
 
+  private static final String NEWLINE = "\n";
   private final IConnectionManager m;
   private final NullParameterSource nullParameterSource = new NullParameterSource();
 
@@ -106,53 +107,28 @@ public class JdbcHelper implements IJdbcHelper {
   @TransactionalAware
   public <T> T queryForObject(String query, ParameterSource parameterSource,
       ResultRowMapper<T> rowMapper) {
-    Connection c = null;
-    boolean inTransaction = false;
 
-    if (ConnectionHolder.isTransaction()) {
-      inTransaction = true;
-      c = ConnectionHolder.getConnection();
-      if (c == null) {
-        c = m.createConnection();
-        ConnectionHolder.setConnection(c);
-      }
-    } else {
-      c = m.createConnection();
-    }
+    List<T> results = query(query, parameterSource, rowMapper);
 
-    T t = null;
-    PreparedStatement ps = null;
-    ResultSet rs = null;
-    try {
-      ps = c.prepareStatement(query);
-      parameterSource.setParameters(ps);
-      rs = ps.executeQuery();
-      int rowNum = 0;
-      while (rs.next()) {
-        t = rowMapper.mapRow(rs, rowNum);
-        rowNum++;
+    switch (results.size()) {
+    case 0:
+      return null;
+    case 1:
+      return results.get(0);
+
+    default:
+      assert results.size() > 1;
+      StringBuilder sb = new StringBuilder();
+      sb.append("Too many results").append(NEWLINE);
+      sb.append("query=").append(query).append(NEWLINE);
+      sb.append("results=[").append(NEWLINE);
+      for (T t : results) {
+        sb.append(t).append(",").append(NEWLINE);
       }
-      if (rowNum > 1) {
-        throw new RuntimeException("Too many results");
-      }
-    } catch (SQLException e) {
-      throw new RuntimeSQLException(e);
-    } finally {
-      if (!inTransaction) {
-        try {
-          if (rs != null) {
-            rs.close();
-          }
-          if (ps != null) {
-            ps.close();
-          }
-          c.close();
-        } catch (SQLException e) {
-          throw new RuntimeSQLException(e);
-        }
-      }
+      sb.append("results=]").append(NEWLINE);
+      throw new RuntimeException(sb.toString());
+
     }
-    return t;
   }
 
   @Override
