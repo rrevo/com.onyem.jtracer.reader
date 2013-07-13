@@ -22,11 +22,13 @@ import com.onyem.jtracer.reader.db.Transactional;
 import com.onyem.jtracer.reader.db.factory.IJdbcHelperFactory;
 import com.onyem.jtracer.reader.db.util.LongParameterSource;
 import com.onyem.jtracer.reader.db.util.StringParameterSource;
+import com.onyem.jtracer.reader.meta.Activator;
 import com.onyem.jtracer.reader.meta.ClassId;
 import com.onyem.jtracer.reader.meta.ClassType;
 import com.onyem.jtracer.reader.meta.IClass;
 import com.onyem.jtracer.reader.meta.internal.ClassNameUtils;
 import com.onyem.jtracer.reader.meta.internal.IMetaServiceExtended;
+import com.onyem.jtracer.reader.meta.internal.Messages;
 
 @DAO
 @Immutable
@@ -152,6 +154,16 @@ public class ClassDAO {
 
   @Transactional
   public IClass insertClass(final IClass clazz) {
+
+    // If this class exists then merge the new data
+    if (clazz.getClassType() == ClassType.CLASS) {
+      IClass existingClass = getClassByName(clazz.getPackageName(),
+          clazz.getClassName(), false);
+      if (existingClass != null) {
+        return mergeClass(clazz, existingClass);
+      }
+    }
+
     final long id = helper.update(new PreparedStatementCreator() {
 
       @Override
@@ -243,6 +255,102 @@ public class ClassDAO {
         });
       }
     }
+    return getClassById(id);
+  }
+
+  /*
+   * Merge a class where only the name is present (loaded as part of an
+   * exception trace) to one where all additional fields are known.
+   * 
+   * See https://github.com/rrevo/com.onyem.jtracer.reader/issues/2
+   */
+  @Transactional
+  private IClass mergeClass(final IClass clazz, final IClass existingClass) {
+    if (existingClass.getClassType() != ClassType.CLASS) {
+      throw new UnsupportedOperationException();
+    }
+
+    Activator.logInfo(Messages.MERGE_CLASS + " " + clazz + " " + existingClass,
+        null);
+
+    assert existingClass.getMetaId() == null;
+    assert existingClass.getAccess() == null;
+    assert existingClass.getClassType() == ClassType.CLASS;
+    assert existingClass.getCanonicalName().equals(clazz.getCanonicalName());
+    assert existingClass.getSuperClass() == null;
+    assert existingClass.getInterfaces().isEmpty();
+
+    final long id = existingClass.getId().getId();
+
+    final Object ret = helper.update(new PreparedStatementCreator() {
+
+      @Override
+      public void setParameters(PreparedStatement statement)
+          throws SQLException {
+        Long metaId = clazz.getMetaId();
+        int index = 1;
+        if (metaId == null) {
+          statement.setNull(index++, Types.BIGINT);
+        } else {
+          statement.setLong(index++, metaId);
+        }
+        Integer access = clazz.getAccess();
+        if (access == null) {
+          statement.setNull(index++, Types.INTEGER);
+        } else {
+          statement.setInt(index++, access);
+        }
+
+        if (clazz.getCanonicalSignature() == null) {
+          statement.setNull(index++, Types.VARCHAR);
+        } else {
+          statement.setString(index++, clazz.getCanonicalSignature());
+        }
+
+        ClassId superClass = clazz.getSuperClass();
+        if (superClass == null) {
+          statement.setNull(index++, Types.BIGINT);
+        } else {
+          statement.setLong(index++, superClass.getId());
+        }
+
+        statement.setLong(index++, id);
+      }
+
+      @Override
+      public String getSql() {
+        return "UPDATE CLASSES SET META_ID = ? , ACCESS = ? , "
+            + " SIGNATURE = ? , SUPERCLASS_ID = ? WHERE ID = ?";
+      }
+
+    }, new ResultRowMapper<Long>() {
+
+      @Override
+      public Long mapRow(ResultSet rs, int rowNum) throws SQLException {
+        return rs.getLong(1);
+      }
+    });
+    if (clazz.getInterfaces() != null) {
+      Set<ClassId> interfaces = clazz.getInterfaces();
+      for (final ClassId interfaceClazz : interfaces) {
+        helper.update(new PreparedStatementCreator() {
+
+          @Override
+          public void setParameters(PreparedStatement statement)
+              throws SQLException {
+            statement.setLong(1, id);
+            statement.setLong(2, interfaceClazz.getId());
+          }
+
+          @Override
+          public String getSql() {
+            return "INSERT INTO CLASS_INTERFACES (CLASS_ID, INTERFACE_ID) VALUES (?, ?)";
+          }
+        });
+      }
+    }
+
+    assert ret == null;
     return getClassById(id);
   }
 }
