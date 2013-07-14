@@ -12,6 +12,7 @@ import org.eclipse.ui.application.IActionBarConfigurer;
 import com.onyem.jtracer.reader.ui.actions.AboutAction;
 import com.onyem.jtracer.reader.ui.actions.OnlineHelpAction;
 import com.onyem.jtracer.reader.ui.actions.OpenFileAction;
+import com.onyem.jtracer.reader.ui.actions.ToggleQueryDebugAction;
 
 public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 
@@ -21,6 +22,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
   private IWorkbenchAction introAction;
   private OnlineHelpAction onlineHelpAction;
   private AboutAction aboutAction;
+  private ToggleQueryDebugAction queryDebugAction;
 
   public ApplicationActionBarAdvisor(IActionBarConfigurer configurer) {
     super(configurer);
@@ -34,6 +36,8 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 
     introAction = ActionFactory.INTRO.create(window);
     register(introAction);
+    queryDebugAction = new ToggleQueryDebugAction(window);
+    register(queryDebugAction);
     onlineHelpAction = new OnlineHelpAction(window);
     register(onlineHelpAction);
     aboutAction = new AboutAction(window);
@@ -49,6 +53,10 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 
     MenuManager helpMenu = new MenuManager("&Help", null);
     helpMenu.add(introAction);
+    helpMenu.add(new Separator());
+    MenuManager toolsMenu = new MenuManager("&Tools", null);
+    helpMenu.add(toolsMenu);
+    toolsMenu.add(queryDebugAction);
     helpMenu.add(new Separator());
     helpMenu.add(onlineHelpAction);
     helpMenu.add(aboutAction);

@@ -38,4 +38,6 @@ public interface Constants {
 
   public final String DATABASE_PATH = ".onyemdb";
 
+  public final String PREF_QUERY_DEBUG = "query.debug.show";
+
 }

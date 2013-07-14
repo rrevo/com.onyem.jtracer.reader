@@ -21,7 +21,9 @@ import java.util.regex.Pattern;
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.onyem.jtracer.reader.db.IConnectionManager;
+import com.onyem.jtracer.reader.db.IJdbcHelper;
 import com.onyem.jtracer.reader.db.factory.IConnectionManagerFactory;
+import com.onyem.jtracer.reader.db.factory.IJdbcHelperFactory;
 import com.onyem.jtracer.reader.events.IEventService;
 import com.onyem.jtracer.reader.events.factory.IEventServiceFactory;
 import com.onyem.jtracer.reader.meta.IMetaService;
@@ -46,6 +48,7 @@ public class Trace implements Closeable {
   private final IPropertiesParser propertiesParser;
 
   private final IConnectionManager connectionManager;
+  private final IJdbcHelperFactory jdbcHelperFactory;
   private final IMetaService metaService;
   private final Map<String, IEventService> eventServiceMap;
 
@@ -54,6 +57,7 @@ public class Trace implements Closeable {
 
   public Trace(PropertiesParserFactory propertiesParserFactory,
       IConnectionManagerFactory connectionManagerFactory,
+      IJdbcHelperFactory jdbcHelperFactory,
       MetaParserFactory metaParserFactory,
       IMetaServiceFactory metaServiceFactory,
       EventParserFactory eventParserFactory,
@@ -66,6 +70,7 @@ public class Trace implements Closeable {
 
     this.connectionManager = connectionManagerFactory
         .createWithMigration(getDatabasePath());
+    this.jdbcHelperFactory = jdbcHelperFactory;
 
     File metaFile = new File(applicationPath, Constants.META_FILE_NAME);
     RandomAccessFile randomMetaFile = null;
@@ -253,6 +258,10 @@ public class Trace implements Closeable {
 
   public IEventService getEventService(String eventFileName) {
     return eventServiceMap.get(eventFileName);
+  }
+
+  public IJdbcHelper getJdbcHelper() {
+    return jdbcHelperFactory.create(connectionManager);
   }
 
   @Override

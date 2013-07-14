@@ -11,6 +11,7 @@ public interface Messages {
   public String VERSION_AT_LATEST = "Version " + Constants.AGENT_VERSION;
 
   public final String SUMMARY_LABEL = "Summary";
+  public final String QUERY_LABEL = "Debug Query";
   public final String TRACE_LABEL = "Trace";
   public final String OPEN_LABEL = "Open";
   public final String LOADING_LABEL = "Loading ...";
@@ -26,5 +27,6 @@ public interface Messages {
   //  public String ERROR_OPENING_CONFIG_EDITOR = "Error opening Agent Configuration Editor";
 
   public String ERROR_CLOSING_TRACE = "Error closing trace";
+  public String ERROR_SAVING_PREFS = "Error saving preferences";
 
 }

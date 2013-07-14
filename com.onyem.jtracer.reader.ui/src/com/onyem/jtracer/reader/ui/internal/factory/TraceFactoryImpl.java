@@ -2,6 +2,7 @@ package com.onyem.jtracer.reader.ui.internal.factory;
 
 import com.google.inject.Inject;
 import com.onyem.jtracer.reader.db.factory.IConnectionManagerFactory;
+import com.onyem.jtracer.reader.db.factory.IJdbcHelperFactory;
 import com.onyem.jtracer.reader.events.factory.IEventServiceFactory;
 import com.onyem.jtracer.reader.meta.factory.IMetaServiceFactory;
 import com.onyem.jtracer.reader.parser.factory.EventParserFactory;
@@ -17,6 +18,7 @@ public class TraceFactoryImpl implements TraceFactory {
 
   private final PropertiesParserFactory propertiesParserFactory;
   private final IConnectionManagerFactory connectionManagerFactory;
+  private final IJdbcHelperFactory jdbcHelperFactory;
   private final MetaParserFactory metaParserFactory;
   private final IMetaServiceFactory metaServiceFactory;
   private final EventParserFactory eventParserFactory;
@@ -25,12 +27,14 @@ public class TraceFactoryImpl implements TraceFactory {
   @Inject
   TraceFactoryImpl(PropertiesParserFactory propertiesParserFactory,
       IConnectionManagerFactory connectionManagerFactory,
+      IJdbcHelperFactory jdbcHelperFactory,
       MetaParserFactory metaParserFactory,
       IMetaServiceFactory metaServiceFactory,
       EventParserFactory eventParserFactory,
       IEventServiceFactory eventServiceFactory) {
     this.propertiesParserFactory = propertiesParserFactory;
     this.connectionManagerFactory = connectionManagerFactory;
+    this.jdbcHelperFactory = jdbcHelperFactory;
     this.metaParserFactory = metaParserFactory;
     this.metaServiceFactory = metaServiceFactory;
     this.eventParserFactory = eventParserFactory;
@@ -46,9 +50,9 @@ public class TraceFactoryImpl implements TraceFactory {
       public void run() {
         try {
           Trace trace = new Trace(propertiesParserFactory,
-              connectionManagerFactory, metaParserFactory, metaServiceFactory,
-              eventParserFactory, eventServiceFactory, queueService,
-              applicationPath);
+              connectionManagerFactory, jdbcHelperFactory, metaParserFactory,
+              metaServiceFactory, eventParserFactory, eventServiceFactory,
+              queueService, applicationPath);
           traceResultClient.setTraceResult(trace, null);
         } catch (Exception e) {
           traceResultClient.setTraceResult(null, e);

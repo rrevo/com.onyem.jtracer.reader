@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -22,11 +23,13 @@ import org.eclipse.ui.part.EditorPart;
 import com.onyem.jtracer.reader.ui.Activator;
 import com.onyem.jtracer.reader.ui.dialogs.ErrorDialog;
 import com.onyem.jtracer.reader.ui.editors.trace.model.Trace;
+import com.onyem.jtracer.reader.ui.editors.trace.ui.QueryDebugComposite;
 import com.onyem.jtracer.reader.ui.editors.trace.ui.SimpleFigureCanvas;
 import com.onyem.jtracer.reader.ui.editors.trace.ui.SummaryComposite;
 import com.onyem.jtracer.reader.ui.editors.trace.ui.TraceResultClient;
 import com.onyem.jtracer.reader.ui.editors.trace.ui.figure.EventTraceFigure;
 import com.onyem.jtracer.reader.ui.factory.TraceFactory;
+import com.onyem.jtracer.reader.ui.util.Constants;
 import com.onyem.jtracer.reader.ui.util.Messages;
 import com.onyem.jtracer.reader.ui.util.SWTResourceManager;
 import com.onyem.jtracer.reader.ui.util.SWTUtils;
@@ -123,6 +126,11 @@ public class TraceEditor extends EditorPart implements TraceResultClient {
           tabFolder = new CTabFolder(editorParent, SWT.BOTTOM);
           createSummaryTab();
 
+          if (Platform.getPreferencesService().getBoolean(ID,
+              Constants.PREF_QUERY_DEBUG, false, null)) {
+            createQueryDebugTab();
+          }
+
           editorParent.layout();
         }
       }
@@ -138,6 +146,16 @@ public class TraceEditor extends EditorPart implements TraceResultClient {
     tabItemSummary.setText(Messages.SUMMARY_LABEL);
     tabItemSummary.setControl(summaryComposite);
     tabFolder.setSelection(tabItemSummary);
+  }
+
+  private void createQueryDebugTab() {
+    SWTUtils.assertDisplayThread();
+
+    CTabItem tabQueryDebug = new CTabItem(tabFolder, SWT.NONE);
+    QueryDebugComposite queryDebugComposite = new QueryDebugComposite(
+        tabFolder, Activator.getQueue(), trace, this);
+    tabQueryDebug.setText(Messages.QUERY_LABEL);
+    tabQueryDebug.setControl(queryDebugComposite);
   }
 
   public void createEventTab(String eventFileName) {

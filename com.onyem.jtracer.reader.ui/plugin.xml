@@ -50,6 +50,10 @@
             id="com.onyem.jtracer.reader.ui.actions.OpenFileAction"
             name="Open File">
       </command>
+      <command
+            id="com.onyem.jtracer.reader.ui.actions.ToggleQueryDebugAction"
+            name="Toggle Query Debug">
+      </command>
    </extension>
    
    <extension
